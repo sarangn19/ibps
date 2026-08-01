@@ -5,7 +5,7 @@ const getStudents = async (req, res) => {
     const result = await pool.query(`
       SELECT u.id, u.name, u.email, u.batch_id, u.created_at, b.name as batch_name,
         (SELECT COUNT(*) FROM attempts WHERE user_id = u.id AND status = 'completed') as tests_completed,
-        (SELECT ROUND(AVG(total_score), 2) FROM attempts WHERE user_id = u.id AND status = 'completed' AND total_score IS NOT NULL) as avg_score,
+        (SELECT ROUND(AVG(total_score)::numeric, 2) FROM attempts WHERE user_id = u.id AND status = 'completed' AND total_score IS NOT NULL) as avg_score,
         (SELECT MAX(a.started_at) FROM attempts a WHERE a.user_id = u.id) as last_active
       FROM users u
       LEFT JOIN batches b ON b.id = u.batch_id
