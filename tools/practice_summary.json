@@ -1,0 +1,15 @@
+{
+  "requested": 300,
+  "generated": 282,
+  "by_topic": {
+    "idiom": 11,
+    "spelling": 37,
+    "clozeSet": 10,
+    "sentence": 29,
+    "rcSet": 10,
+    "oneword": 34,
+    "grammar": 39,
+    "antonym": 64,
+    "synonym": 48
+  }
+}

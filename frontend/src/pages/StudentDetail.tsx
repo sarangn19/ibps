@@ -1,0 +1,173 @@
+import React, { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import api from '../utils/api';
+import { ArrowLeft, Clock, Brain } from 'lucide-react';
+
+const classificationColor = (cls: string) => {
+  switch (cls) {
+    case 'strong': return 'text-green-600 bg-green-50';
+    case 'developing': return 'text-yellow-600 bg-yellow-50';
+    case 'weak': return 'text-red-600 bg-red-50';
+    default: return 'text-gray-400 bg-gray-50';
+  }
+};
+
+const StudentDetail: React.FC = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    api.get(`/admin/students/${id}`)
+      .then(r => setData(r.data))
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, [id]);
+
+  if (loading) return <div className="min-h-screen flex items-center justify-center bg-gray-50"><div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div></div>;
+  if (!data) return <div className="min-h-screen flex items-center justify-center bg-gray-50"><p className="text-gray-600">Student not found</p></div>;
+
+  const { student, attempts, mastery, logs, trends } = data;
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <nav className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center">
+          <button onClick={() => navigate('/admin')} className="flex items-center gap-1 text-gray-600 hover:text-gray-900 mr-4">
+            <ArrowLeft className="h-4 w-4" /><span className="text-sm">Back to Admin</span>
+          </button>
+          <h1 className="text-lg font-bold text-gray-900">{student.name}</h1>
+          <span className="ml-3 text-sm text-gray-500">{student.email}</span>
+          <span className="ml-3 px-2 py-0.5 text-xs bg-blue-100 text-blue-800 rounded-full">{student.batch_name || 'No batch'}</span>
+        </div>
+      </nav>
+
+      <div className="max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left: Attempts + Trends */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Stats row */}
+          <div className="grid grid-cols-3 gap-4">
+            <div className="bg-white rounded-lg shadow-sm border p-4">
+              <p className="text-xs text-gray-500 uppercase">Tests Completed</p>
+              <p className="text-2xl font-bold text-gray-900">{attempts.filter((a: any) => a.status === 'completed').length}</p>
+            </div>
+            <div className="bg-white rounded-lg shadow-sm border p-4">
+              <p className="text-xs text-gray-500 uppercase">Avg Score</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {attempts.filter((a: any) => a.status === 'completed').length > 0
+                  ? (attempts.filter((a: any) => a.status === 'completed').reduce((s: number, a: any) => s + (a.total_score || 0), 0) / attempts.filter((a: any) => a.status === 'completed').length).toFixed(1)
+                  : '—'}
+              </p>
+            </div>
+            <div className="bg-white rounded-lg shadow-sm border p-4">
+              <p className="text-xs text-gray-500 uppercase">Mastery Topics</p>
+              <p className="text-2xl font-bold text-gray-900">{mastery.length}</p>
+            </div>
+          </div>
+
+          {/* Attempt History */}
+          <div className="bg-white rounded-lg shadow-sm border">
+            <div className="p-4 border-b"><h2 className="font-semibold text-gray-900">Attempt History</h2></div>
+            <div className="divide-y">
+              {attempts.length === 0 ? (
+                <p className="p-4 text-sm text-gray-500">No attempts yet</p>
+              ) : attempts.map((a: any) => (
+                <div key={a.id} className="p-4 flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-gray-900">{a.test_title}</p>
+                    <p className="text-xs text-gray-500">
+                      {new Date(a.started_at).toLocaleDateString()} · {a.test_type?.replace(/_/g, ' ')}
+                      {a.total_score !== null && ` · Score: ${a.total_score}`}
+                    </p>
+                  </div>
+                  <span className={`px-2 py-0.5 text-xs rounded-full font-medium ${
+                    a.status === 'completed' ? 'bg-green-100 text-green-800' :
+                    a.status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
+                    'bg-red-100 text-red-800'
+                  }`}>{a.status}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Score Trend Chart */}
+          {trends.length > 1 && (
+            <div className="bg-white rounded-lg shadow-sm border p-4">
+              <h2 className="font-semibold text-gray-900 mb-3">Score Trend</h2>
+              <div className="flex items-end gap-2 h-32">
+                {trends.map((t: any, i: number) => {
+                  const maxScore = Math.max(...trends.map((x: any) => x.total_score || 0), 1);
+                  const height = ((t.total_score || 0) / maxScore) * 100;
+                  return (
+                    <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                      <span className="text-xs text-gray-600">{t.total_score?.toFixed(1)}</span>
+                      <div className="w-full bg-blue-100 rounded-t" style={{ height: `${Math.max(height, 4)}%` }}>
+                        <div className="bg-blue-600 w-full rounded-t" style={{ height: `${height}%` }}></div>
+                      </div>
+                      <span className="text-xs text-gray-400">{new Date(t.date).toLocaleDateString().slice(0, 5)}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Right: Mastery + Logs */}
+        <div className="space-y-6">
+          {/* Expertise Map */}
+          <div className="bg-white rounded-lg shadow-sm border">
+            <div className="p-4 border-b"><h2 className="font-semibold text-gray-900 flex items-center gap-2"><Brain className="h-4 w-4" /> Expertise Map</h2></div>
+            <div className="divide-y max-h-80 overflow-y-auto">
+              {mastery.length === 0 ? (
+                <p className="p-4 text-sm text-gray-500">No mastery data</p>
+              ) : mastery.map((m: any) => (
+                <div key={m.id} className="p-3">
+                  <div className="flex items-center justify-between mb-1">
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">{m.subtopic}</p>
+                      <p className="text-xs text-gray-500">{m.subject} &gt; {m.topic}</p>
+                    </div>
+                    <span className={`px-1.5 py-0.5 text-xs rounded-full ${classificationColor(m.classification)}`}>{m.classification}</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-1.5">
+                    <div className={`h-1.5 rounded-full ${m.classification === 'strong' ? 'bg-green-500' : m.classification === 'developing' ? 'bg-yellow-500' : 'bg-red-500'}`}
+                      style={{ width: `${m.mastery_score}%` }}></div>
+                  </div>
+                  <div className="flex items-center gap-3 text-xs text-gray-500 mt-1">
+                    <span>{m.mastery_score.toFixed(0)}%</span>
+                    <span>{m.attempt_count} attempts</span>
+                    <span>{m.accuracy_rolling.toFixed(0)}% acc</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Activity Log */}
+          <div className="bg-white rounded-lg shadow-sm border">
+            <div className="p-4 border-b"><h2 className="font-semibold text-gray-900 flex items-center gap-2"><Clock className="h-4 w-4" /> Recent Activity</h2></div>
+            <div className="divide-y max-h-60 overflow-y-auto text-sm">
+              {logs.length === 0 ? (
+                <p className="p-4 text-sm text-gray-500">No activity logs</p>
+              ) : logs.slice(0, 20).map((log: any) => (
+                <div key={log.id} className="px-4 py-2 flex items-center gap-2">
+                  <span className="text-xs text-gray-400 w-16 shrink-0">{new Date(log.timestamp).toLocaleDateString()}</span>
+                  <span className={`px-1.5 py-0.5 text-xs rounded-full ${
+                    log.event_type === 'login' ? 'bg-blue-100 text-blue-700' :
+                    log.event_type === 'test_started' ? 'bg-green-100 text-green-700' :
+                    log.event_type === 'test_submitted' ? 'bg-purple-100 text-purple-700' :
+                    'bg-gray-100 text-gray-700'
+                  }`}>{log.event_type.replace(/_/g, ' ')}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default StudentDetail;

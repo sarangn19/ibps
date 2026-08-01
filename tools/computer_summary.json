@@ -1,0 +1,29 @@
+{
+  "requested": 600,
+  "generated": 211,
+  "by_topic": {
+    "Fundamentals/Full Forms": 33,
+    "Hardware/Input Devices": 13,
+    "Hardware/Components & Functions": 9,
+    "Memory & Storage/Units of Memory": 8,
+    "Memory & Storage/Unit Conversion": 13,
+    "MS Office/Keyboard Shortcuts": 15,
+    "MS Office/Applications": 6,
+    "Networking/Protocols": 10,
+    "Networking/Network Devices": 6,
+    "Security/Malware": 6,
+    "Security/Safety & Protection": 4,
+    "Database & SQL/SQL Commands": 8,
+    "Database & SQL/DBMS Basics": 3,
+    "Internet & File Formats/File Extensions": 9,
+    "Fundamentals/Software Categories": 6,
+    "Internet & File Formats/Web Browsers": 5,
+    "Fundamentals/Programming Languages": 5,
+    "Fundamentals/History & Pioneers": 5,
+    "Memory & Storage/Types of Memory": 4,
+    "Number Systems/Binary Conversion": 22,
+    "Hardware/Output Devices": 6,
+    "Hardware/Storage Devices": 7,
+    "Number Systems/Hexadecimal Conversion": 8
+  }
+}
