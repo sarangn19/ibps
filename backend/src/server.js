@@ -33,6 +33,10 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'IBPS Coaching API is running' });
 });
 
+app.get('/', (req, res) => {
+  res.json({ status: 'ok', message: 'IBPS Coaching API is running' });
+});
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
