@@ -1,36 +1,35 @@
-const Database = require('better-sqlite3');
-const path = require('path');
+const { Pool } = require('pg');
 require('dotenv').config();
 
-const DB_PATH = process.env.DB_PATH || path.join(__dirname, '..', '..', 'data', 'ibps.db');
-
-// Ensure directory exists
-const fs = require('fs');
-const dir = path.dirname(DB_PATH);
-if (!fs.existsSync(dir)) {
-  fs.mkdirSync(dir, { recursive: true });
+const DATABASE_URL = process.env.DATABASE_URL;
+if (!DATABASE_URL) {
+  console.error('DATABASE_URL is not set. Add it to backend/.env (Supabase > Settings > Database > Session pooler URI).');
+  process.exit(1);
 }
 
-const db = new Database(DB_PATH);
+const pool = new Pool({
+  connectionString: DATABASE_URL,
+  ssl: process.env.DB_SSL === 'off' ? false : { rejectUnauthorized: false }
+});
 
-db.pragma('journal_mode = WAL');
-db.pragma('foreign_keys = ON');
+// Controllers were written with `?` placeholders (SQLite style); Postgres needs $1, $2, ...
+function translate(sql) {
+  let i = 0;
+  return sql.replace(/\?/g, () => `$${++i}`);
+}
 
-const query = (sql, params = []) => {
-  const trimmed = sql.trim();
-  const upper = trimmed.toUpperCase();
-  const isSelect = upper.startsWith('SELECT');
-  const hasReturning = upper.includes('RETURNING');
+// Mirrors the previous wrapper's shape: { rows, rowCount, lastInsertRowid }
+async function query(sql, params = []) {
+  const result = await pool.query(translate(sql), params);
+  const rows = result.rows || [];
+  const lastInsertRowid = rows.length ? rows[0].id : undefined;
+  return { rows, rowCount: result.rowCount, lastInsertRowid };
+}
 
-  const stmt = db.prepare(sql);
+query.query = query;
+query.pool = pool;
+query.db = pool;
+query.connect = pool.connect.bind(pool);
+query.end = pool.end.bind(pool);
 
-  if (isSelect || hasReturning) {
-    const rows = params.length > 0 ? stmt.all(...params) : stmt.all();
-    return { rows, rowCount: rows.length };
-  }
-
-  const info = params.length > 0 ? stmt.run(...params) : stmt.run();
-  return { rows: [], rowCount: info.changes, lastInsertRowid: info.lastInsertRowid };
-};
-
-module.exports = { query, db };
+module.exports = query;

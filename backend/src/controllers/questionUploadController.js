@@ -88,94 +88,93 @@ const uploadQuestions = async (req, res) => {
       });
     }
 
-    const insert = pool.db.prepare(`
-      INSERT INTO questions
-        (subject, topic, subtopic, difficulty, question_text, option_a, option_b, option_c, option_d, option_e, correct_option, explanation, exam_stage, tags, set_id, created_by)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `);
-
-    const insertSet = pool.db.prepare(
-      `INSERT INTO question_sets (set_type, title, stimulus, source) VALUES (?, ?, ?, ?)`
-    );
-
     const setCache = new Map();
     let inserted = 0;
     const errors = [];
 
-    pool.db.pragma('foreign_keys = OFF');
-    pool.db.exec('BEGIN TRANSACTION');
-    for (let i = 0; i < rows.length; i++) {
-      const row = rows[i];
-      const rowNumber = i + 2;
-      const rec = {
-        subject: parseCell(row[col.subject]),
-        topic: parseCell(row[col.topic]),
-        subtopic: parseCell(row[col.subtopic]),
-        difficulty: parseCell(row[col.difficulty]).toLowerCase(),
-        question_text: parseCell(row[col.questiontext]),
-        option_a: parseCell(row[col.optiona]),
-        option_b: parseCell(row[col.optionb]),
-        option_c: parseCell(row[col.optionc]),
-        option_d: parseCell(row[col.optiond]),
-        option_e: parseCell(row[col.optione]),
-        correct_option: parseCell(row[col.correctoption]).toLowerCase(),
-        explanation: parseCell(row[col.explanation]),
-        exam_stage: parseCell(row[col.examstage]).toLowerCase(),
-        tags: parseCell(row[col.tags]),
-        set_title: col.settitle ? parseCell(row[col.settitle]) : '',
-        set_type: col.settype ? parseCell(row[col.settype]).toLowerCase() : '',
-        set_stimulus: col.setstimulus ? parseCell(row[col.setstimulus]) : '',
-        set_source: col.setsource ? parseCell(row[col.setsource]) : ''
-      };
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+      for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+        const rowNumber = i + 2;
+        const rec = {
+          subject: parseCell(row[col.subject]),
+          topic: parseCell(row[col.topic]),
+          subtopic: parseCell(row[col.subtopic]),
+          difficulty: parseCell(row[col.difficulty]).toLowerCase(),
+          question_text: parseCell(row[col.questiontext]),
+          option_a: parseCell(row[col.optiona]),
+          option_b: parseCell(row[col.optionb]),
+          option_c: parseCell(row[col.optionc]),
+          option_d: parseCell(row[col.optiond]),
+          option_e: parseCell(row[col.optione]),
+          correct_option: parseCell(row[col.correctoption]).toLowerCase(),
+          explanation: parseCell(row[col.explanation]),
+          exam_stage: parseCell(row[col.examstage]).toLowerCase(),
+          tags: parseCell(row[col.tags]),
+          set_title: col.settitle ? parseCell(row[col.settitle]) : '',
+          set_type: col.settype ? parseCell(row[col.settype]).toLowerCase() : '',
+          set_stimulus: col.setstimulus ? parseCell(row[col.setstimulus]) : '',
+          set_source: col.setsource ? parseCell(row[col.setsource]) : ''
+        };
 
-      const problems = [];
-      if (!rec.subject) problems.push('subject is empty');
-      if (!rec.topic) problems.push('topic is empty');
-      if (!rec.question_text) problems.push('question_text is empty');
-      if (!rec.option_a || !rec.option_b || !rec.option_c || !rec.option_d) problems.push('options a, b, c and d are required');
-      if (!VALID_DIFFICULTY.includes(rec.difficulty)) problems.push(`difficulty must be one of: ${VALID_DIFFICULTY.join('/')}`);
-      if (!VALID_CORRECT.includes(rec.correct_option)) problems.push(`correct_option must be one of: ${VALID_CORRECT.join('/')}`);
-      if (!VALID_STAGE.includes(rec.exam_stage)) problems.push(`exam_stage must be one of: ${VALID_STAGE.join('/')}`);
-      if (rec.set_type && !VALID_SET_TYPE.includes(rec.set_type)) problems.push(`set_type must be one of: ${VALID_SET_TYPE.join('/')}`);
+        const problems = [];
+        if (!rec.subject) problems.push('subject is empty');
+        if (!rec.topic) problems.push('topic is empty');
+        if (!rec.question_text) problems.push('question_text is empty');
+        if (!rec.option_a || !rec.option_b || !rec.option_c || !rec.option_d) problems.push('options a, b, c and d are required');
+        if (!VALID_DIFFICULTY.includes(rec.difficulty)) problems.push(`difficulty must be one of: ${VALID_DIFFICULTY.join('/')}`);
+        if (!VALID_CORRECT.includes(rec.correct_option)) problems.push(`correct_option must be one of: ${VALID_CORRECT.join('/')}`);
+        if (!VALID_STAGE.includes(rec.exam_stage)) problems.push(`exam_stage must be one of: ${VALID_STAGE.join('/')}`);
+        if (rec.set_type && !VALID_SET_TYPE.includes(rec.set_type)) problems.push(`set_type must be one of: ${VALID_SET_TYPE.join('/')}`);
 
-      if (problems.length > 0) {
-        errors.push({ row: rowNumber, error: problems.join('; ') });
-        continue;
-      }
-
-      let setId = null;
-      if (rec.set_title) {
-        const setKey = `${rec.set_title} ||| ${rec.set_stimulus || rec.set_title}`;
-        if (setCache.has(setKey)) {
-          setId = setCache.get(setKey);
-        } else {
-          const setType = rec.set_type || 'group';
-          const info = insertSet.run(
-            setType,
-            rec.set_title,
-            rec.set_stimulus || rec.set_title,
-            rec.set_source || null
-          );
-          setId = Number(info.lastInsertRowid);
-          setCache.set(setKey, setId);
+        if (problems.length > 0) {
+          errors.push({ row: rowNumber, error: problems.join('; ') });
+          continue;
         }
-      }
 
-      insert.run(
-        rec.subject, rec.topic, rec.subtopic, rec.difficulty, rec.question_text,
-        rec.option_a, rec.option_b, rec.option_c, rec.option_d, rec.option_e, rec.correct_option,
-        rec.explanation, rec.exam_stage, rec.tags ? JSON.stringify(rec.tags.split(',').map(t => t.trim()).filter(Boolean)) : '[]',
-        setId, req.user.id
-      );
-      inserted++;
+        let setId = null;
+        if (rec.set_title) {
+          const setKey = `${rec.set_title} ||| ${rec.set_stimulus || rec.set_title}`;
+          if (setCache.has(setKey)) {
+            setId = setCache.get(setKey);
+          } else {
+            const setType = rec.set_type || 'group';
+            const info = await client.query(
+              `INSERT INTO question_sets (set_type, title, stimulus, source)
+               VALUES ($1, $2, $3, $4) RETURNING id`,
+              [setType, rec.set_title, rec.set_stimulus || rec.set_title, rec.set_source || null]
+            );
+            setId = Number(info.rows[0].id);
+            setCache.set(setKey, setId);
+          }
+        }
+
+        await client.query(
+          `INSERT INTO questions
+             (subject, topic, subtopic, difficulty, question_text, option_a, option_b, option_c, option_d, option_e, correct_option, explanation, exam_stage, tags, set_id, created_by)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)`,
+          [
+            rec.subject, rec.topic, rec.subtopic, rec.difficulty, rec.question_text,
+            rec.option_a, rec.option_b, rec.option_c, rec.option_d, rec.option_e, rec.correct_option,
+            rec.explanation, rec.exam_stage,
+            rec.tags ? JSON.stringify(rec.tags.split(',').map(t => t.trim()).filter(Boolean)) : '[]',
+            setId, req.user.id
+          ]
+        );
+        inserted++;
+      }
+      await client.query('COMMIT');
+    } catch (error) {
+      try { await client.query('ROLLBACK'); } catch (e) { /* no active transaction */ }
+      throw error;
+    } finally {
+      client.release();
     }
-    pool.db.exec('COMMIT');
-    pool.db.pragma('foreign_keys = ON');
 
     res.json({ inserted, total: rows.length, errors, sets_created: setCache.size });
   } catch (error) {
-    try { pool.db.exec('ROLLBACK'); } catch (e) { /* no active transaction */ }
-    try { pool.db.pragma('foreign_keys = ON'); } catch (e) { /* ignore */ }
     console.error('Upload questions error:', error);
     res.status(500).json({ error: 'Failed to upload questions' });
   }

@@ -1,4 +1,5 @@
 const pool = require('../database/db');
+const { parseQuestionIds } = require('../utils/questionIds');
 
 const getTests = async (req, res) => {
   try {
@@ -25,7 +26,7 @@ const getTests = async (req, res) => {
     query += ' ORDER BY created_at DESC';
 
     const result = await pool.query(query, params);
-    const rows = result.rows.map(r => ({ ...r, question_ids: JSON.parse(r.question_ids || '[]') }));
+    const rows = result.rows.map(r => ({ ...r, question_ids: parseQuestionIds(r.question_ids) }));
     res.json(rows);
   } catch (error) {
     console.error('Get tests error:', error);
@@ -44,8 +45,8 @@ const getTestById = async (req, res) => {
 
     const test = result.rows[0];
 
-    // Parse question_ids from JSON string
-    const questionIds = JSON.parse(test.question_ids || '[]');
+    // Parse question_ids (JSON text or Postgres array literal)
+    const questionIds = parseQuestionIds(test.question_ids);
 
     if (questionIds.length === 0) {
       test.questions = [];

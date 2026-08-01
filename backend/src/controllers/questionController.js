@@ -129,10 +129,11 @@ const createQuestion = async (req, res) => {
 
     let setId = null;
     if (set_title) {
-      const setInfo = pool.db.prepare(
-        `INSERT INTO question_sets (set_type, title, stimulus) VALUES (?, ?, ?)`
-      ).run(set_type || 'group', set_title, set_stimulus || set_title);
-      setId = Number(setInfo.lastInsertRowid);
+      const setInfo = await pool.query(
+        `INSERT INTO question_sets (set_type, title, stimulus) VALUES (?, ?, ?) RETURNING id`,
+        [set_type || 'group', set_title, set_stimulus || set_title]
+      );
+      setId = Number(setInfo.rows[0].id);
     }
 
     const result = await pool.query(
@@ -168,14 +169,16 @@ const updateQuestion = async (req, res) => {
     if (set_title !== undefined) {
       if (set_title) {
         if (existing.rows[0].set_id) {
-          pool.db.prepare(
-            `UPDATE question_sets SET title = ?, set_type = ?, stimulus = ? WHERE id = ?`
-          ).run(set_title, set_type || 'group', set_stimulus || set_title, existing.rows[0].set_id);
+          await pool.query(
+            `UPDATE question_sets SET title = ?, set_type = ?, stimulus = ? WHERE id = ?`,
+            [set_title, set_type || 'group', set_stimulus || set_title, existing.rows[0].set_id]
+          );
         } else {
-          const setInfo = pool.db.prepare(
-            `INSERT INTO question_sets (set_type, title, stimulus) VALUES (?, ?, ?)`
-          ).run(set_type || 'group', set_title, set_stimulus || set_title);
-          setId = Number(setInfo.lastInsertRowid);
+          const setInfo = await pool.query(
+            `INSERT INTO question_sets (set_type, title, stimulus) VALUES (?, ?, ?) RETURNING id`,
+            [set_type || 'group', set_title, set_stimulus || set_title]
+          );
+          setId = Number(setInfo.rows[0].id);
         }
       } else {
         setId = null;

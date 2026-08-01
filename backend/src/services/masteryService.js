@@ -1,4 +1,4 @@
-const { db } = require('../database/db');
+const query = require('../database/db');
 
 const EXPECTED_TIME = { easy: 45, medium: 60, hard: 90 };
 const THRESHOLDS = { strong: 70, developing: 40 };
@@ -56,10 +56,12 @@ function updateBucket(bucket, is_correct) {
 }
 
 // Incremental, recency-weighted mastery update for a single response.
-function recalculateMastery(userId, subject, topic, subtopic, response = {}) {
-  const existing = db.prepare(
-    `SELECT * FROM student_topic_mastery WHERE user_id = ? AND subject = ? AND topic = ? AND subtopic = ?`
-  ).get(userId, subject, topic, subtopic);
+async function recalculateMastery(userId, subject, topic, subtopic, response = {}) {
+  const existingRow = await query(
+    `SELECT * FROM student_topic_mastery WHERE user_id = ? AND subject = ? AND topic = ? AND subtopic = ?`,
+    [userId, subject, topic, subtopic]
+  );
+  const existing = existingRow.rows[0] || null;
 
   const prev = existing || {
     attempt_count: 0, accuracy_rolling: 0, avg_time_vs_expected: null,
@@ -110,12 +112,12 @@ function recalculateMastery(userId, subject, topic, subtopic, response = {}) {
   const last_result = is_correct;
   const current_streak = is_correct ? (prev.current_streak || 0) + 1 : 0;
 
-  db.prepare(`
+  await query(`
     INSERT INTO student_topic_mastery
       (user_id, subject, topic, subtopic, mastery_score, raw_score, attempt_count, accuracy_rolling,
        avg_time_vs_expected, error_type_breakdown, classification, last_result, current_streak,
        peak_score, time_samples, difficulty_accuracy, stage_accuracy, last_attempt_at, last_updated_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, to_char(now(), 'YYYY-MM-DD HH24:MI:SS'), to_char(now(), 'YYYY-MM-DD HH24:MI:SS'))
     ON CONFLICT(user_id, subject, topic, subtopic) DO UPDATE SET
       mastery_score = excluded.mastery_score,
       raw_score = excluded.raw_score,
@@ -132,32 +134,38 @@ function recalculateMastery(userId, subject, topic, subtopic, response = {}) {
       stage_accuracy = excluded.stage_accuracy,
       last_attempt_at = excluded.last_attempt_at,
       last_updated_at = excluded.last_updated_at
-  `).run(
-    userId, subject, topic, subtopic,
-    mastery_score, raw_score, attempt_count, accuracy_rolling,
-    avg_time_vs_expected, JSON.stringify(errorBreakdown), classify(mastery_score),
-    last_result, current_streak, peak_score, time_samples,
-    JSON.stringify(difficultyAccuracy), JSON.stringify(stageAccuracy)
+  `,
+    [
+      userId, subject, topic, subtopic,
+      mastery_score, raw_score, attempt_count, accuracy_rolling,
+      avg_time_vs_expected, JSON.stringify(errorBreakdown), classify(mastery_score),
+      last_result, current_streak, peak_score, time_samples,
+      JSON.stringify(difficultyAccuracy), JSON.stringify(stageAccuracy)
+    ]
   );
 }
 
 // Persist a point-in-time snapshot of a subtopic's mastery for trend tracking.
-function snapshotMastery(userId, subject, topic, subtopic) {
-  const row = db.prepare(
-    `SELECT * FROM student_topic_mastery WHERE user_id = ? AND subject = ? AND topic = ? AND subtopic = ?`
-  ).get(userId, subject, topic, subtopic);
+async function snapshotMastery(userId, subject, topic, subtopic) {
+  const rowResult = await query(
+    `SELECT * FROM student_topic_mastery WHERE user_id = ? AND subject = ? AND topic = ? AND subtopic = ?`,
+    [userId, subject, topic, subtopic]
+  );
+  const row = rowResult.rows[0];
   if (!row) return;
 
-  db.prepare(`
+  await query(`
     INSERT INTO mastery_history
       (user_id, subject, topic, subtopic, mastery_score, raw_score, classification, attempt_count,
        accuracy_rolling, avg_time_vs_expected, error_type_breakdown, difficulty_accuracy, snapshot_type, timestamp)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'attempt', datetime('now'))
-  `).run(
-    userId, subject, topic, subtopic,
-    row.mastery_score, row.raw_score, row.classification, row.attempt_count,
-    row.accuracy_rolling, row.avg_time_vs_expected, row.error_type_breakdown,
-    row.difficulty_accuracy
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'attempt', to_char(now(), 'YYYY-MM-DD HH24:MI:SS'))
+  `,
+    [
+      userId, subject, topic, subtopic,
+      row.mastery_score, row.raw_score, row.classification, row.attempt_count,
+      row.accuracy_rolling, row.avg_time_vs_expected, row.error_type_breakdown,
+      row.difficulty_accuracy
+    ]
   );
 }
 

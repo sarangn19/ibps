@@ -139,7 +139,7 @@ const getFlags = async (req, res) => {
       FROM users u
       LEFT JOIN batches b ON b.id = u.batch_id
       WHERE u.role = 'student'
-      AND COALESCE((SELECT MAX(a.started_at) FROM attempts a WHERE a.user_id = u.id), u.created_at) < datetime('now', '-7 days')
+      AND COALESCE((SELECT MAX(a.started_at) FROM attempts a WHERE a.user_id = u.id), u.created_at) < to_char(now() - interval '7 days', 'YYYY-MM-DD HH24:MI:SS')
       ORDER BY last_active ASC
     `);
     for (const s of inactiveResult.rows) {

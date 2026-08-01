@@ -1,5 +1,6 @@
 const pool = require('../database/db');
 const { recalculateMastery, snapshotMastery } = require('../services/masteryService');
+const { parseQuestionIds } = require('../utils/questionIds');
 
 const startAttempt = async (req, res) => {
   try {
@@ -26,8 +27,8 @@ const startAttempt = async (req, res) => {
       [user_id, 'test_started', JSON.stringify({ test_id, attempt_id: attempt.id })]
     );
 
-    // Parse question_ids from JSON string
-    const questionIds = JSON.parse(test.question_ids || '[]');
+    // Parse question_ids (JSON text or Postgres array literal)
+    const questionIds = parseQuestionIds(test.question_ids);
     test.question_ids = questionIds;
 
     if (questionIds.length === 0) {
@@ -112,7 +113,7 @@ const saveResponse = async (req, res) => {
 
     // Real-time mastery recalculation (incremental, recency-weighted)
     try {
-      recalculateMastery(attempt.user_id, q.subject, q.topic, q.subtopic, {
+      await recalculateMastery(attempt.user_id, q.subject, q.topic, q.subtopic, {
         is_correct: Boolean(is_correct),
         time_spent_seconds: response.time_spent_seconds,
         error_tag: response.error_tag,
@@ -196,7 +197,7 @@ const submitAttempt = async (req, res) => {
 
     const updateResult = await pool.query(
       `UPDATE attempts 
-       SET submitted_at = datetime('now'), total_score = ?, section_scores = ?, status = 'completed'
+       SET submitted_at = to_char(now(), 'YYYY-MM-DD HH24:MI:SS'), total_score = ?, section_scores = ?, status = 'completed'
        WHERE id = ?
        RETURNING *`,
       [total_score, JSON.stringify(section_scores), attempt_id]
@@ -219,7 +220,7 @@ const submitAttempt = async (req, res) => {
         [attempt_id]
       );
       for (const key of touchedResult.rows) {
-        snapshotMastery(user_id, key.subject, key.topic, key.subtopic);
+        await snapshotMastery(user_id, key.subject, key.topic, key.subtopic);
       }
     } catch (e) {
       console.error('Mastery snapshot error:', e);

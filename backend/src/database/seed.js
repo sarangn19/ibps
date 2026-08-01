@@ -128,32 +128,32 @@ async function seed() {
 
     await client.query(
       'INSERT INTO tests (title, type, exam_stage, duration_minutes, negative_marking_ratio, batch_id, question_ids) VALUES ($1, $2, $3, $4, $5, $6, $7)',
-      ['IBPS PO Full Mock 1', 'full_mock', 'prelims', 60, 0.25, batchId, allIds]
+      ['IBPS PO Full Mock 1', 'full_mock', 'prelims', 60, 0.25, batchId, JSON.stringify(allIds)]
     );
     console.log('Created: Full Mock Test (60 questions)');
 
     await client.query(
       'INSERT INTO tests (title, type, exam_stage, duration_minutes, negative_marking_ratio, batch_id, question_ids) VALUES ($1, $2, $3, $4, $5, $6, $7)',
-      ['Reasoning Ability Sectional', 'sectional', 'prelims', 20, 0.25, batchId, reaIds]
+      ['Reasoning Ability Sectional', 'sectional', 'prelims', 20, 0.25, batchId, JSON.stringify(reaIds)]
     );
     console.log('Created: Reasoning Sectional Test');
 
     await client.query(
       'INSERT INTO tests (title, type, exam_stage, duration_minutes, negative_marking_ratio, batch_id, question_ids) VALUES ($1, $2, $3, $4, $5, $6, $7)',
-      ['Quantitative Aptitude Sectional', 'sectional', 'prelims', 20, 0.25, batchId, quantIds]
+      ['Quantitative Aptitude Sectional', 'sectional', 'prelims', 20, 0.25, batchId, JSON.stringify(quantIds)]
     );
     console.log('Created: Quantitative Aptitude Sectional Test');
 
     await client.query(
       'INSERT INTO tests (title, type, exam_stage, duration_minutes, negative_marking_ratio, batch_id, question_ids) VALUES ($1, $2, $3, $4, $5, $6, $7)',
-      ['English Language Sectional', 'sectional', 'prelims', 15, 0.25, batchId, engIds]
+      ['English Language Sectional', 'sectional', 'prelims', 15, 0.25, batchId, JSON.stringify(engIds)]
     );
     console.log('Created: English Sectional Test');
 
     const easyReaQ = questionIds.filter((_, i) => i < 20 && (questions[i].difficulty === 'easy' || questions[i].difficulty === 'medium')).slice(0, 10);
     await client.query(
       'INSERT INTO tests (title, type, exam_stage, duration_minutes, negative_marking_ratio, batch_id, question_ids) VALUES ($1, $2, $3, $4, $5, $6, $7)',
-      ['Reasoning Basics Practice', 'topic_practice', 'prelims', 15, 0, batchId, easyReaQ]
+      ['Reasoning Basics Practice', 'topic_practice', 'prelims', 15, 0, batchId, JSON.stringify(easyReaQ)]
     );
     console.log('Created: Topic Practice Test');
 
