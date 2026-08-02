@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Attempt, Test, QuestionResponse } from '../types';
 import api from '../utils/api';
+import MobileNav from '../components/MobileNav';
 import { CheckCircle, XCircle, ArrowLeft, TrendingUp } from 'lucide-react';
 
 const Results: React.FC = () => {
@@ -76,67 +77,67 @@ const Results: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <nav className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
+        <div className="max-w-lg mx-auto px-4">
+          <div className="flex justify-between h-14 items-center">
             <div className="flex items-center space-x-4">
               <button
                 onClick={() => navigate('/dashboard')}
-                className="flex items-center space-x-2 text-gray-600 hover:text-gray-900"
+                className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 touch-target"
               >
                 <ArrowLeft className="h-5 w-5" />
-                <span>Back to Dashboard</span>
+                <span>Dashboard</span>
               </button>
             </div>
           </div>
         </div>
       </nav>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">{test.title}</h1>
-          <p className="text-gray-600 mt-1">Test Results</p>
+      <div className="max-w-lg mx-auto px-4 py-6 pb-nav">
+        <div className="mb-6">
+          <h1 className="text-xl font-bold text-gray-900">{test.title}</h1>
+          <p className="text-gray-600 mt-0.5 text-sm">Test Results</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Total Score</p>
-                <p className="text-3xl font-bold text-gray-900">{score.total.toFixed(2)}</p>
+                <p className="text-xs text-gray-600">Score</p>
+                <p className="text-2xl font-bold text-gray-900">{score.total.toFixed(2)}</p>
               </div>
-              <TrendingUp className="h-8 w-8 text-blue-600" />
+              <TrendingUp className="h-7 w-7 text-blue-600" />
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Correct</p>
-                <p className="text-3xl font-bold text-green-600">{score.correct}</p>
+                <p className="text-xs text-gray-600">Correct</p>
+                <p className="text-2xl font-bold text-green-600">{score.correct}</p>
               </div>
-              <CheckCircle className="h-8 w-8 text-green-600" />
+              <CheckCircle className="h-7 w-7 text-green-600" />
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Attempted</p>
-                <p className="text-3xl font-bold text-gray-900">{score.attempted}</p>
+                <p className="text-xs text-gray-600">Attempted</p>
+                <p className="text-2xl font-bold text-gray-900">{score.attempted}</p>
               </div>
-              <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
+              <div className="h-7 w-7 bg-blue-100 rounded-full flex items-center justify-center">
                 <span className="text-blue-600 font-semibold">{score.attempted}</span>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Accuracy</p>
-                <p className="text-3xl font-bold text-purple-600">{score.accuracy}%</p>
+                <p className="text-xs text-gray-600">Accuracy</p>
+                <p className="text-2xl font-bold text-purple-600">{score.accuracy}%</p>
               </div>
-              <div className="h-8 w-8 bg-purple-100 rounded-full flex items-center justify-center">
+              <div className="h-7 w-7 bg-purple-100 rounded-full flex items-center justify-center">
                 <span className="text-purple-600 font-semibold">%</span>
               </div>
             </div>
@@ -187,7 +188,7 @@ const Results: React.FC = () => {
                 )}
                 <p className="text-gray-900 mb-4 whitespace-pre-wrap">{response.question_text}</p>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-4">
                   {['a', 'b', 'c', 'd', 'e'].map((option) => {
                     const isSelected = response.selected_option === option;
                     const isCorrect = response.correct_option === option;
@@ -246,6 +247,8 @@ const Results: React.FC = () => {
           </div>
         </div>
       </div>
+
+      <MobileNav />
     </div>
   );
 };

@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Test, TestHistory, SubjectTree, StudyPlan } from '../types';
 import api from '../utils/api';
 import ExpertiseMap from '../components/ExpertiseMap';
+import MobileNav from '../components/MobileNav';
 import { BookOpen, Clock, BarChart3, Award, TrendingUp, Target, Zap, Brain, Calendar } from 'lucide-react';
 
 interface Recommendation {
@@ -126,18 +127,16 @@ const Dashboard: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <nav className="bg-white shadow-sm border-b sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-14 items-center">
-            <h1 className="text-lg font-bold text-gray-900">IBPS Coaching</h1>
-            <div className="flex items-center space-x-3">
-              <span className="text-sm text-gray-600 hidden sm:inline">{user?.name}</span>
-              <button onClick={logout} className="text-sm text-red-600 hover:text-red-700">Logout</button>
-            </div>
+        <div className="max-w-lg mx-auto px-4 h-14 flex justify-between items-center">
+          <h1 className="text-lg font-bold text-gray-900">IBPS Coaching</h1>
+          <div className="flex items-center space-x-3">
+            <span className="text-sm text-gray-600 hidden sm:inline">{user?.name}</span>
+            <button onClick={logout} className="text-sm text-red-600 hover:text-red-700 touch-target px-2">Logout</button>
           </div>
         </div>
       </nav>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
+      <div className="max-w-lg mx-auto px-4 py-5 space-y-6 pb-nav">
 
         {/* Practice Your Weak Areas */}
         <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl shadow-md p-6 text-white">
@@ -173,7 +172,7 @@ const Dashboard: React.FC = () => {
               <Zap className="h-5 w-5 text-amber-500" />
               Recommended for You
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {recommendations.map(rec => (
                 <div key={`${rec.subject}|${rec.topic}|${rec.subtopic}`} className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 hover:shadow-md transition-shadow">
                   <div className="flex items-start justify-between mb-2">
@@ -235,7 +234,7 @@ const Dashboard: React.FC = () => {
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Available Tests */}
           <div className="lg:col-span-2 space-y-4">
             <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
@@ -383,6 +382,8 @@ const Dashboard: React.FC = () => {
             <p className="text-xs text-gray-500">in bank</p>
           </div>
         </div>
+
+        <MobileNav />
       </div>
     </div>
   );

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { SubjectTree } from '../types';
 import api from '../utils/api';
+import MobileNav from '../components/MobileNav';
 import { ArrowLeft, ChevronRight, Play } from 'lucide-react';
 
 const TopicPractice: React.FC = () => {
@@ -67,8 +68,8 @@ const TopicPractice: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <nav className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center">
-          <button onClick={() => navigate('/dashboard')} className="flex items-center gap-1 text-gray-600 hover:text-gray-900 mr-4">
+        <div className="max-w-lg mx-auto px-4 h-14 flex items-center">
+          <button onClick={() => navigate('/dashboard')} className="flex items-center gap-1 text-gray-600 hover:text-gray-900 mr-4 touch-target">
             <ArrowLeft className="h-4 w-4" />
             <span className="text-sm">Back</span>
           </button>
@@ -76,7 +77,7 @@ const TopicPractice: React.FC = () => {
         </div>
       </nav>
 
-      <div className="max-w-4xl mx-auto px-4 py-6">
+      <div className="max-w-lg mx-auto px-4 py-5 pb-nav">
         {/* Breadcrumb */}
         <div className="flex items-center gap-1 text-sm text-gray-500 mb-6">
           <span>Subjects</span>
@@ -261,6 +262,8 @@ const TopicPractice: React.FC = () => {
           </div>
         )}
       </div>
+
+      <MobileNav />
     </div>
   );
 };

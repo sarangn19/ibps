@@ -5,6 +5,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Onboarding from './pages/Onboarding';
+import Profile from './pages/Profile';
 import TestTaking from './pages/TestTaking';
 import Results from './pages/Results';
 import TopicPractice from './pages/TopicPractice';
@@ -85,6 +86,14 @@ const App: React.FC = () => {
               <OnboardingRoute>
                 <Onboarding />
               </OnboardingRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
             }
           />
           <Route
