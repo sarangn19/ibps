@@ -271,15 +271,15 @@ GEN.timework = (rng) => {
       explanation: `Together they finish ${1/a} + ${1/b} of the work per day = ${(a + b) / (a * b)}. Days = ${a * b}/${a + b} = ${t} days.`
     });
   }
-  // A can do 1/d of the total work; total work = A_days * d units
+  // A finishes the job in d days; total work = A_days * units-per-day
   const totalWork = a * d;
   return template(rng, {
     subject: 'Quantitative Aptitude', topic: 'Time & Work', subtopic: 'Work Units',
     difficulty: 'easy', exam_stage: 'prelims', tags: ['timework', 'practice'],
-    question: `A can finish a job in ${d} days and works at the rate of ${d * 1}n/a; `,
-    compute: () => totalWork,
+    question: `A can finish a job in ${d} days. If the total work amounts to ${totalWork} units, how many units does A complete in one day?`,
+    compute: () => a,
     distractors: (c) => near(rng, c),
-    explanation: 'Placeholder.',
+    explanation: `Work done per day = total work / days = ${totalWork}/${d} = ${a} units.`,
   });
 };
 

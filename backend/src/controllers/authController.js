@@ -18,11 +18,12 @@ const register = async (req, res) => {
     const password_hash = await bcrypt.hash(password, 10);
 
     const result = await pool.query(
-      'INSERT INTO users (name, email, password_hash, role, batch_id) VALUES (?, ?, ?, ?, ?) RETURNING id, name, email, role, batch_id',
+      'INSERT INTO users (name, email, password_hash, role, batch_id) VALUES (?, ?, ?, ?, ?) RETURNING id, name, email, role, batch_id, exam_goal, target_year, prep_level, daily_study_minutes, onboarding_completed',
       [name, email, password_hash, role, batch_id]
     );
 
     const user = result.rows[0];
+    if (user.onboarding_completed === null || user.onboarding_completed === undefined) user.onboarding_completed = false;
 
     const token = jwt.sign(
       { id: user.id, email: user.email, role: user.role },
@@ -74,7 +75,12 @@ const login = async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
-        batch_id: user.batch_id
+        batch_id: user.batch_id,
+        exam_goal: user.exam_goal,
+        target_year: user.target_year,
+        prep_level: user.prep_level,
+        daily_study_minutes: user.daily_study_minutes,
+        onboarding_completed: user.onboarding_completed === true || user.onboarding_completed === 'true' || user.onboarding_completed === 1
       },
       token
     });
@@ -87,7 +93,7 @@ const login = async (req, res) => {
 const getMe = async (req, res) => {
   try {
     const result = await pool.query(
-      'SELECT id, name, email, role, batch_id, created_at FROM users WHERE id = ?',
+      'SELECT id, name, email, role, batch_id, created_at, exam_goal, target_year, prep_level, daily_study_minutes, onboarding_completed FROM users WHERE id = ?',
       [req.user.id]
     );
 
@@ -95,11 +101,129 @@ const getMe = async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    res.json(result.rows[0]);
+    const user = result.rows[0];
+    user.onboarding_completed = user.onboarding_completed === true || user.onboarding_completed === 'true' || user.onboarding_completed === 1;
+    res.json(user);
   } catch (error) {
     console.error('Get user error:', error);
     res.status(500).json({ error: 'Failed to fetch user' });
   }
 };
 
-module.exports = { register, login, getMe };
+const saveOnboarding = async (req, res) => {
+  try {
+    const { exam_goal, target_year, prep_level, daily_study_minutes } = req.body;
+
+    if (!exam_goal) {
+      return res.status(400).json({ error: 'exam_goal is required' });
+    }
+    if (!target_year) {
+      return res.status(400).json({ error: 'target_year is required' });
+    }
+    if (!['beginner', 'intermediate', 'advanced'].includes(prep_level)) {
+      return res.status(400).json({ error: 'prep_level must be beginner, intermediate or advanced' });
+    }
+    const minutes = parseInt(daily_study_minutes, 10);
+    if (!minutes || minutes < 15 || minutes > 600) {
+      return res.status(400).json({ error: 'daily_study_minutes must be between 15 and 600' });
+    }
+
+    const result = await pool.query(
+      `UPDATE users SET exam_goal = ?, target_year = ?, prep_level = ?, daily_study_minutes = ?, onboarding_completed = true
+       WHERE id = ? RETURNING id, name, email, role, batch_id, exam_goal, target_year, prep_level, daily_study_minutes, onboarding_completed`,
+      [exam_goal, target_year, prep_level, minutes, req.user.id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const user = result.rows[0];
+    user.onboarding_completed = user.onboarding_completed === true || user.onboarding_completed === 'true' || user.onboarding_completed === 1;
+    res.json(user);
+  } catch (error) {
+    console.error('Save onboarding error:', error);
+    res.status(500).json({ error: 'Failed to save onboarding' });
+  }
+};
+
+const getStudyPlan = async (req, res) => {
+  try {
+    const userResult = await pool.query(
+      'SELECT exam_goal, target_year, prep_level, daily_study_minutes, onboarding_completed FROM users WHERE id = ?',
+      [req.user.id]
+    );
+    const profile = userResult.rows[0];
+    if (!profile || !(profile.onboarding_completed === true || profile.onboarding_completed === 'true' || profile.onboarding_completed === 1)) {
+      return res.status(400).json({ error: 'Onboarding not completed yet' });
+    }
+
+    const level = profile.prep_level;
+    const minutes = profile.daily_study_minutes;
+
+    const mastery = await pool.query(
+      'SELECT subject, topic, subtopic, classification, mastery_score, attempt_count, accuracy_rolling FROM student_topic_mastery WHERE user_id = ? ORDER BY mastery_score ASC',
+      [req.user.id]
+    );
+
+    const weak = mastery.rows.filter(r => ['weak', 'developing'].includes(r.classification));
+    const attempted = mastery.rows.filter(r => r.attempt_count > 0);
+    const avgAccuracy = attempted.length
+      ? attempted.reduce((s, r) => s + (r.accuracy_rolling || 0), 0) / attempted.length
+      : null;
+
+    const topicsBySubject = {};
+    for (const r of weak) {
+      if (!topicsBySubject[r.subject]) topicsBySubject[r.subject] = [];
+      if (!topicsBySubject[r.subject].includes(r.topic)) topicsBySubject[r.subject].push(r.topic);
+    }
+
+    const questionsPerDay = Math.round(minutes / 1.5);
+    const plan = [];
+    const subjects = Object.keys(topicsBySubject).length
+      ? Object.entries(topicsBySubject)
+      : [['Quantitative Aptitude', []], ['Reasoning Ability', []], ['English Language', []], ['General Awareness', []]];
+
+    const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    const starterBySubject = {
+      'Quantitative Aptitude': ['Percentage', 'Simplification'],
+      'Reasoning Ability': ['Inequalities', 'Blood Relations'],
+      'English Language': ['Vocabulary', 'Grammar'],
+      'General Awareness': ['Banking Awareness', 'Static GK']
+    };
+    for (let d = 0; d < 7; d++) {
+      const [subject, topics] = subjects[d % subjects.length];
+      const starters = starterBySubject[subject] || ['Percentage', 'Simplification'];
+      const planTopics = topics.length
+        ? topics.slice(0, 2)
+        : starters.slice(0, 2);
+      plan.push({
+        day: d + 1,
+        day_name: dayNames[d],
+        focus_subject: subject,
+        topics: planTopics,
+        questions_to_practice: questionsPerDay,
+        activity: level === 'beginner'
+          ? `Learn the concept then practice ${questionsPerDay} questions from ${planTopics.join(', ')}`
+          : `Practice ${questionsPerDay} questions from ${planTopics.join(', ')} and review explanations`,
+        notes: weak.length === 0 ? 'Start with foundational practice across subjects.' : 'Targets your current weak areas.'
+      });
+    }
+
+    res.json({
+      exam_goal: profile.exam_goal,
+      target_year: profile.target_year,
+      prep_level: level,
+      daily_study_minutes: minutes,
+      questions_per_day: questionsPerDay,
+      avg_accuracy: avgAccuracy !== null ? Math.round(avgAccuracy) : null,
+      weak_topic_count: weak.length,
+      weekly_plan: plan
+    });
+  } catch (error) {
+    console.error('Get study plan error:', error);
+    res.status(500).json({ error: 'Failed to generate study plan' });
+  }
+};
+
+module.exports = { register, login, getMe, saveOnboarding, getStudyPlan };

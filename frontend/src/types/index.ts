@@ -4,6 +4,30 @@ export interface User {
   email: string;
   role: 'student' | 'admin';
   batch_id?: number;
+  exam_goal?: string | null;
+  target_year?: number | null;
+  prep_level?: string | null;
+  daily_study_minutes?: number | null;
+  onboarding_completed?: boolean;
+}
+
+export interface StudyPlan {
+  exam_goal: string;
+  target_year: number;
+  prep_level: string;
+  daily_study_minutes: number;
+  questions_per_day: number;
+  avg_accuracy: number | null;
+  weak_topic_count: number;
+  weekly_plan: {
+    day: number;
+    day_name: string;
+    focus_subject: string;
+    topics: string[];
+    questions_to_practice: number;
+    activity: string;
+    notes: string;
+  }[];
 }
 
 export interface Question {

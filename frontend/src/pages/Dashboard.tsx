@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { Test, TestHistory, SubjectTree } from '../types';
+import { Test, TestHistory, SubjectTree, StudyPlan } from '../types';
 import api from '../utils/api';
 import ExpertiseMap from '../components/ExpertiseMap';
-import { BookOpen, Clock, BarChart3, Award, TrendingUp, Target, Zap, Brain } from 'lucide-react';
+import { BookOpen, Clock, BarChart3, Award, TrendingUp, Target, Zap, Brain, Calendar } from 'lucide-react';
 
 interface Recommendation {
   subject: string;
@@ -24,11 +24,19 @@ const Dashboard: React.FC = () => {
   const [history, setHistory] = useState<Record<number, TestHistory>>({});
   const [subjects, setSubjects] = useState<SubjectTree[]>([]);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
+  const [studyPlan, setStudyPlan] = useState<StudyPlan | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([fetchTests(), fetchHistory(), fetchSubjects(), fetchRecommendations()]).finally(() => setLoading(false));
+    Promise.all([fetchTests(), fetchHistory(), fetchSubjects(), fetchRecommendations(), fetchStudyPlan()]).finally(() => setLoading(false));
   }, []);
+
+  const fetchStudyPlan = async () => {
+    try {
+      const res = await api.get('/auth/me/study-plan');
+      setStudyPlan(res.data);
+    } catch (e) { /* skip if onboarding not complete */ }
+  };
 
   const fetchRecommendations = async () => {
     try {
@@ -192,6 +200,37 @@ const Dashboard: React.FC = () => {
                   </button>
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* Your Study Plan */}
+        {studyPlan && (
+          <div>
+            <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2 mb-3">
+              <Calendar className="h-5 w-5 text-green-600" />
+              Your Weekly Study Plan
+            </h2>
+            <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-5">
+              <div className="flex flex-wrap gap-3 mb-4 text-sm">
+                <span className="px-3 py-1 bg-green-50 text-green-700 rounded-full font-medium">{studyPlan.exam_goal} {studyPlan.target_year}</span>
+                <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full capitalize">{studyPlan.prep_level}</span>
+                <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full">~{studyPlan.questions_per_day} questions/day</span>
+                {studyPlan.avg_accuracy !== null && (
+                  <span className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full">Avg accuracy {studyPlan.avg_accuracy}%</span>
+                )}
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                {studyPlan.weekly_plan.slice(0, 4).map(d => (
+                  <div key={d.day} className="border border-gray-100 rounded-lg p-3">
+                    <p className="text-xs font-semibold text-green-600 uppercase">{d.day_name}</p>
+                    <p className="font-medium text-gray-900 text-sm mt-1">{d.focus_subject}</p>
+                    <p className="text-xs text-gray-600">{d.topics.join(', ')}</p>
+                    <p className="text-xs text-gray-500 mt-2">{d.questions_to_practice} questions</p>
+                  </div>
+                ))}
+              </div>
+              <p className="text-xs text-gray-500 mt-3">{studyPlan.weekly_plan[0]?.activity}</p>
             </div>
           </div>
         )}

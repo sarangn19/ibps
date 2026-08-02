@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
+import Onboarding from './pages/Onboarding';
 import TestTaking from './pages/TestTaking';
 import Results from './pages/Results';
 import TopicPractice from './pages/TopicPractice';
@@ -45,6 +46,24 @@ const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return <>{children}</>;
 };
 
+const OnboardingRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
+
+  if (!user) {
+    return <Navigate to="/login" />;
+  }
+
+  if (user.role !== 'admin' && !user.onboarding_completed) {
+    return <>{children}</>;
+  }
+
+  return <Navigate to="/dashboard" />;
+};
+
 const App: React.FC = () => {
   return (
     <BrowserRouter>
@@ -58,6 +77,14 @@ const App: React.FC = () => {
               <ProtectedRoute>
                 <Dashboard />
               </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/onboarding"
+            element={
+              <OnboardingRoute>
+                <Onboarding />
+              </OnboardingRoute>
             }
           />
           <Route
