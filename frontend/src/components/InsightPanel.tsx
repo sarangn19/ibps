@@ -1,5 +1,5 @@
-import React from 'react';
-import { Sparkles, Target, Clock, AlertTriangle, TrendingUp, Award, Brain } from 'lucide-react';
+import React, { useState } from 'react';
+import { Sparkles, Target, Clock, AlertTriangle, TrendingUp, Award, Brain, ChevronDown, ChevronUp } from 'lucide-react';
 import { Insight } from '../utils/insightEngine';
 
 const ICONS = {
@@ -18,8 +18,15 @@ const TONES = {
   info: { iconBg: 'bg-lingo-blue/15', iconText: 'text-lingo-blue-dark', accent: 'border-l-lingo-blue' },
 };
 
-const InsightPanel: React.FC<{ insights: Insight[]; title?: string }> = ({ insights, title = 'AI Insights' }) => {
+const InsightPanel: React.FC<{ insights: Insight[]; title?: string; maxVisible?: number }> = ({
+  insights,
+  title = 'AI Insights',
+  maxVisible,
+}) => {
+  const [expanded, setExpanded] = useState(false);
   if (insights.length === 0) return null;
+
+  const visible = maxVisible && !expanded ? insights.slice(0, maxVisible) : insights;
 
   return (
     <div>
@@ -31,7 +38,7 @@ const InsightPanel: React.FC<{ insights: Insight[]; title?: string }> = ({ insig
         </span>
       </h2>
       <div className="space-y-2">
-        {insights.map(ins => {
+        {visible.map(ins => {
           const Icon = ICONS[ins.icon];
           const t = TONES[ins.tone];
           return (
@@ -49,6 +56,18 @@ const InsightPanel: React.FC<{ insights: Insight[]; title?: string }> = ({ insig
           );
         })}
       </div>
+      {maxVisible && insights.length > maxVisible && (
+        <button
+          onClick={() => setExpanded(v => !v)}
+          className="w-full mt-2 py-2.5 rounded-xl text-sm font-bold text-lingo-blue hover:bg-lingo-blue/10 touch-target flex items-center justify-center gap-1"
+        >
+          {expanded ? (
+            <>Show less <ChevronUp className="h-4 w-4" /></>
+          ) : (
+            <>View all {insights.length} insights <ChevronDown className="h-4 w-4" /></>
+          )}
+        </button>
+      )}
     </div>
   );
 };

@@ -195,10 +195,10 @@ const Dashboard: React.FC = () => {
 
         {/* AI Insights */}
         <div>
-          <InsightPanel title="Your Performance Insights" insights={insights} />
+          <InsightPanel title="Your Performance Insights" insights={insights} maxVisible={3} />
         </div>
 
-        {/* Practice Your Weak Areas */}
+        {/* Practice Your Weak Areas + Recommended for You */}
         <div className="lingo-card p-5">
           <div className="flex items-start justify-between">
             <div>
@@ -206,13 +206,15 @@ const Dashboard: React.FC = () => {
                 <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-lingo-orange text-white">
                   <Target className="h-5 w-5" />
                 </span>
-                <h2 className="text-lg font-extrabold text-gray-900">Practice Your Weak Areas</h2>
+                <h2 className="text-lg font-extrabold text-gray-900">Focus on Your Weak Areas</h2>
               </div>
               <p className="text-gray-600 text-sm max-w-lg">
-                Focus on the topics where you need the most improvement. Pick a subject below to drill down by topic.
+                Pick a subject below or jump straight into a recommended topic.
               </p>
             </div>
           </div>
+
+          {/* Subject quick-practice chips */}
           <div className="mt-4 flex flex-wrap gap-2">
             {subjects.slice(0, 5).map(s => (
               <button
@@ -224,18 +226,12 @@ const Dashboard: React.FC = () => {
               </button>
             ))}
           </div>
-        </div>
 
-        {/* Recommended for You */}
-        {recommendations.length > 0 && (
-          <div>
-            <h2 className="text-xl font-extrabold text-gray-900 flex items-center gap-2 mb-3">
-              <Zap className="h-5 w-5 text-lingo-yellow-dark" />
-              Recommended for You
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {recommendations.map(rec => (
-                <div key={`${rec.subject}|${rec.topic}|${rec.subtopic}`} className="lingo-card p-4 hover:-translate-y-0.5 transition-transform">
+          {/* Recommended topics */}
+          {recommendations.length > 0 && (
+            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {recommendations.slice(0, 3).map(rec => (
+                <div key={`${rec.subject}|${rec.topic}|${rec.subtopic}`} className="border-2 border-lingo-border rounded-2xl p-4 hover:-translate-y-0.5 transition-transform">
                   <div className="flex items-start justify-between mb-2">
                     <div>
                       <p className="text-xs text-gray-500">{rec.subject}</p>
@@ -261,8 +257,8 @@ const Dashboard: React.FC = () => {
                 </div>
               ))}
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Your Study Plan */}
         {studyPlan && (
