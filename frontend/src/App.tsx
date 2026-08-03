@@ -17,6 +17,7 @@ import QuestionBank from './pages/QuestionBank';
 import GenerateTest from './pages/GenerateTest';
 import SuperAdmin from './pages/SuperAdmin';
 import Paywall from './pages/Paywall';
+import UxResearch from './pages/UxResearch';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, loading } = useAuth();
@@ -238,6 +239,14 @@ const App: React.FC = () => {
               <SuperAdminRoute>
                 <SuperAdmin />
               </SuperAdminRoute>
+            }
+          />
+          <Route
+            path="/admin/research"
+            element={
+              <AdminRoute>
+                <UxResearch />
+              </AdminRoute>
             }
           />
           <Route path="/" element={<Navigate to="/dashboard" />} />

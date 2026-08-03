@@ -165,6 +165,7 @@ const AdminDashboard: React.FC = () => {
             <Link to="/admin/questions" className="text-gray-600 hover:text-gray-900 shrink-0">Question Bank</Link>
             <Link to="/admin/tests/generate" className="text-gray-600 hover:text-gray-900 hidden sm:inline">Generate Test</Link>
             <Link to="/admin/cohort" className="text-gray-600 hover:text-gray-900 hidden sm:inline">Cohort</Link>
+            <Link to="/admin/research" className="text-gray-600 hover:text-gray-900 shrink-0">UX Research</Link>
             {user?.role === 'superadmin' && (
               <Link to="/admin/superadmin" className="flex items-center gap-1 text-purple-600 font-medium shrink-0">
                 <Shield className="h-3.5 w-3.5" /> Admin
@@ -357,9 +358,12 @@ const AdminDashboard: React.FC = () => {
         </div>
 
         {/* Quick links */}
-        <div className="flex gap-3">
+        <div className="flex gap-3 flex-wrap">
           <button onClick={() => navigate('/admin/cohort')} className="px-4 py-2 bg-white border rounded-lg text-sm text-gray-700 hover:bg-gray-50">
             View Cohort Analytics
+          </button>
+          <button onClick={() => navigate('/admin/research')} className="px-4 py-2 bg-white border rounded-lg text-sm text-gray-700 hover:bg-gray-50">
+            Open UX Research
           </button>
         </div>
       </div>
