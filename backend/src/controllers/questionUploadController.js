@@ -39,7 +39,7 @@ const TEMPLATE_HEADERS = [
 ];
 
 const TEMPLATE_ROW = [
-  'Reasoning', 'Seating Arrangement', 'Linear Arrangement', 'medium',
+  'Reasoning Ability', 'Seating Arrangement', 'Linear Arrangement', 'medium',
   'Example question text goes here...',
   'Option A', 'Option B', 'Option C', 'Option D', 'Option E (optional)',
   'a', 'Explanation for the correct answer (optional)', 'prelims', 'tag1,tag2',

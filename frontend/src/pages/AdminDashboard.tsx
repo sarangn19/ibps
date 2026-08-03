@@ -1,11 +1,18 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import api from '../utils/api';
-import { Users, BarChart3, AlertTriangle, Search, ChevronRight, Clock, Award, TrendingUp, Upload, FileSpreadsheet } from 'lucide-react';
+import PageHeader from '../components/PageHeader';
+import { useAuth } from '../context/AuthContext';
+import { Users, BarChart3, AlertTriangle, Search, Clock, Award, TrendingUp, Upload, FileSpreadsheet, Shield, Crown } from 'lucide-react';
 
 interface Student {
   id: number; name: string; email: string; batch_name: string;
   tests_completed: number; avg_score: number; last_active: string;
+  questions_attempted: number; last_attempt_at: string;
+  subscription_status: string; subscription_plan: string; subscription_ends_at: string; subscription_granted_by: number;
+  created_at: string;
+  referral_code: string; referred_by: number; referred_by_name: string;
+  referred_total: number; referred_paid: number;
 }
 
 interface Flag {
@@ -14,6 +21,7 @@ interface Flag {
 
 const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [students, setStudents] = useState<Student[]>([]);
   const [flags, setFlags] = useState<Flag[]>([]);
   const [loading, setLoading] = useState(true);
@@ -22,6 +30,14 @@ const AdminDashboard: React.FC = () => {
   const [uploadResult, setUploadResult] = useState<any>(null);
   const [uploadError, setUploadError] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
+  const [grantTarget, setGrantTarget] = useState<Student | null>(null);
+  const [grantDuration, setGrantDuration] = useState('lifetime');
+  const [grantBusy, setGrantBusy] = useState(false);
+  const [grantMsg, setGrantMsg] = useState('');
+
+  const refreshStudents = () => {
+    api.get('/admin/students').then(r => setStudents(r.data)).catch(() => {});
+  };
 
   useEffect(() => {
     Promise.all([
@@ -83,6 +99,52 @@ const AdminDashboard: React.FC = () => {
     }
   };
 
+  const subBadge = (s: Student) => {
+    const TRIAL_MS = 14 * 24 * 60 * 60 * 1000;
+    if (s.subscription_plan === 'granted_free' || s.subscription_plan === 'monthly') {
+      const exp = s.subscription_ends_at ? new Date(s.subscription_ends_at) : null;
+      if (exp && exp.getTime() < Date.now()) return { label: 'Expired', cls: 'bg-red-100 text-red-800' };
+      if (s.subscription_plan === 'granted_free' && !s.subscription_ends_at) return { label: 'Free · Lifetime', cls: 'bg-green-100 text-green-800' };
+      return {
+        label: s.subscription_plan === 'granted_free'
+          ? `Free till ${new Date(s.subscription_ends_at).toLocaleDateString()}`
+          : `Paid till ${new Date(s.subscription_ends_at).toLocaleDateString()}`,
+        cls: 'bg-green-100 text-green-800'
+      };
+    }
+    const left = Math.ceil((new Date(s.created_at).getTime() + TRIAL_MS - Date.now()) / (24 * 60 * 60 * 1000));
+    return { label: left > 0 ? `Trial ${left}d` : 'Trial over', cls: left > 0 ? 'bg-gray-100 text-gray-700' : 'bg-red-100 text-red-800' };
+  };
+
+  const openGrant = (s: Student) => { setGrantTarget(s); setGrantDuration('lifetime'); setGrantMsg(''); };
+
+  const grantFree = async () => {
+    if (!grantTarget) return;
+    setGrantBusy(true);
+    setGrantMsg('');
+    try {
+      const days = grantDuration === 'lifetime' ? null : parseInt(grantDuration, 10);
+      await api.post('/admin/subscriptions/grant', { user_id: grantTarget.id, duration_days: days });
+      setGrantMsg(`Free access granted to ${grantTarget.name}.`);
+      refreshStudents();
+      setGrantTarget(null);
+    } catch (e: any) {
+      setGrantMsg(e.response?.data?.error || 'Grant failed');
+    } finally {
+      setGrantBusy(false);
+    }
+  };
+
+  const revokeFree = async (s: Student) => {
+    if (!window.confirm(`Revoke the free subscription for ${s.name}?`)) return;
+    try {
+      await api.post('/admin/subscriptions/revoke', { user_id: s.id });
+      refreshStudents();
+    } catch (e: any) {
+      window.alert(e.response?.data?.error || 'Revoke failed');
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -93,7 +155,25 @@ const AdminDashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <AdminNav />
+      <PageHeader
+        title="IBPS Coaching — Admin"
+        wide
+        showBack={false}
+        right={
+          <div className="flex items-center gap-2 sm:gap-3 text-sm">
+            <Link to="/admin" className="text-blue-600 font-medium">Dashboard</Link>
+            <Link to="/admin/questions" className="text-gray-600 hover:text-gray-900">Question Bank</Link>
+            <Link to="/admin/tests/generate" className="text-gray-600 hover:text-gray-900 hidden sm:inline">Generate Test</Link>
+            <Link to="/admin/cohort" className="text-gray-600 hover:text-gray-900 hidden sm:inline">Cohort</Link>
+            {user?.role === 'superadmin' && (
+              <Link to="/admin/superadmin" className="flex items-center gap-1 text-purple-600 font-medium">
+                <Shield className="h-3.5 w-3.5" /> Admin Management
+              </Link>
+            )}
+            <Link to="/dashboard" className="text-gray-500 hover:text-gray-700 ml-1">Switch to Student View</Link>
+          </div>
+        }
+      />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
         {/* Stats cards */}
@@ -139,8 +219,10 @@ const AdminDashboard: React.FC = () => {
                     <th className="text-left p-3 font-medium">Name</th>
                     <th className="text-left p-3 font-medium">Batch</th>
                     <th className="text-center p-3 font-medium">Tests</th>
+                    <th className="text-center p-3 font-medium">Questions</th>
                     <th className="text-center p-3 font-medium">Avg Score</th>
-                    <th className="text-center p-3 font-medium">Last Active</th>
+                    <th className="text-center p-3 font-medium">Referred</th>
+                    <th className="text-center p-3 font-medium">Access</th>
                     <th className="p-3"></th>
                   </tr>
                 </thead>
@@ -150,14 +232,53 @@ const AdminDashboard: React.FC = () => {
                       <td className="p-3">
                         <p className="font-medium text-gray-900">{s.name}</p>
                         <p className="text-xs text-gray-500">{s.email}</p>
+                        {s.referral_code && (
+                          <p className="text-[10px] text-gray-400 font-bold tracking-wider">
+                            CODE {s.referral_code}
+                            {s.referred_by_name ? ` · via ${s.referred_by_name}` : ''}
+                          </p>
+                        )}
                       </td>
                       <td className="p-3 text-gray-600">{s.batch_name || '—'}</td>
                       <td className="p-3 text-center font-medium">{s.tests_completed}</td>
-                      <td className="p-3 text-center">{s.avg_score ? `${s.avg_score}` : '—'}</td>
-                      <td className="p-3 text-center text-xs text-gray-500">
-                        {s.last_active ? new Date(s.last_active).toLocaleDateString() : 'Never'}
+                      <td className="p-3 text-center">
+                        {s.questions_attempted > 0 ? (
+                          <span title={s.last_attempt_at ? `Last attempt: ${new Date(s.last_attempt_at).toLocaleString()}` : undefined}>
+                            {s.questions_attempted}
+                          </span>
+                        ) : '—'}
                       </td>
-                      <td className="p-3 text-right"><ChevronRight className="h-4 w-4 text-gray-400 inline" /></td>
+                      <td className="p-3 text-center">{s.avg_score ? `${s.avg_score}` : '—'}</td>
+                      <td className="p-3 text-center">
+                        {s.referred_total > 0 ? (
+                          <span title={`${s.referred_paid} paid, ${s.referred_total - s.referred_paid} unpaid`}>
+                            <span className="font-medium text-gray-900">{s.referred_total}</span>
+                            <span className="text-xs text-gray-500"> ({s.referred_paid} paid)</span>
+                          </span>
+                        ) : (
+                          <span className="text-gray-400">—</span>
+                        )}
+                      </td>
+                      <td className="p-3 text-center">
+                        <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${subBadge(s).cls}`}>{subBadge(s).label}</span>
+                      </td>
+                      <td className="p-3 text-right">
+                        {s.subscription_plan === 'granted_free' ? (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); revokeFree(s); }}
+                            className="text-xs text-red-600 hover:text-red-800 font-medium"
+                          >
+                            Revoke
+                          </button>
+                        ) : (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); openGrant(s); }}
+                            className="inline-flex items-center gap-1 text-xs text-green-700 hover:text-green-900 font-medium"
+                          >
+                            <Crown className="h-3.5 w-3.5" /> Grant Free
+                          </button>
+                        )}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -242,25 +363,53 @@ const AdminDashboard: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* Grant free subscription modal */}
+      {grantTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => setGrantTarget(null)}>
+          <div className="w-full max-w-sm bg-white rounded-2xl shadow-xl p-6" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+              <Crown className="h-5 w-5 text-green-600" />
+              Grant free access
+            </h3>
+            <p className="text-sm text-gray-600 mt-1">
+              Give <span className="font-semibold text-gray-900">{grantTarget.name}</span> free access. Current status: {subBadge(grantTarget).label}.
+            </p>
+            <div className="mt-4 grid grid-cols-2 gap-2">
+              {[['1 month', '30'], ['3 months', '90'], ['6 months', '180'], ['12 months', '365']].map(([label, days]) => (
+                <button
+                  key={days}
+                  onClick={() => setGrantDuration(days)}
+                  className={`px-3 py-2 rounded-xl border-2 text-sm font-bold transition-colors ${
+                    grantDuration === days ? 'border-lingo-green bg-lingo-green/15 text-lingo-green-dark' : 'border-lingo-border text-gray-700 hover:border-lingo-green'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+              <button
+                onClick={() => setGrantDuration('lifetime')}
+                className={`col-span-2 px-3 py-2 rounded-xl border-2 text-sm font-bold transition-colors ${
+                  grantDuration === 'lifetime' ? 'border-lingo-green bg-lingo-green/15 text-lingo-green-dark' : 'border-lingo-border text-gray-700 hover:border-lingo-green'
+                }`}
+              >
+                Lifetime
+              </button>
+            </div>
+            {grantMsg && <p className="mt-3 text-sm text-red-600">{grantMsg}</p>}
+            <div className="mt-5 flex gap-2">
+              <button onClick={() => setGrantTarget(null)} className="flex-1 px-4 py-2.5 rounded-xl bg-gray-100 text-gray-700 text-sm font-bold hover:bg-gray-200">
+                Cancel
+              </button>
+              <button onClick={grantFree} disabled={grantBusy} className="flex-1 px-4 py-2.5 rounded-xl bg-lingo-green text-white text-sm font-bold border-b-4 border-lingo-green-dark hover:bg-lingo-green-dark disabled:opacity-50">
+                {grantBusy ? 'Granting...' : 'Grant Free'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
-
-const AdminNav: React.FC = () => (
-  <nav className="bg-white shadow-sm border-b">
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
-      <div className="flex items-center gap-4">
-        <h1 className="text-lg font-bold text-gray-900">IBPS Coaching — Admin</h1>
-        <div className="flex gap-3 text-sm">
-          <a href="/admin" className="text-blue-600 font-medium">Dashboard</a>
-          <a href="/admin/questions" className="text-gray-600 hover:text-gray-900">Question Bank</a>
-          <a href="/admin/tests/generate" className="text-gray-600 hover:text-gray-900">Generate Test</a>
-          <a href="/admin/cohort" className="text-gray-600 hover:text-gray-900">Cohort</a>
-        </div>
-      </div>
-      <a href="/dashboard" className="text-sm text-gray-500 hover:text-gray-700">Switch to Student View</a>
-    </div>
-  </nav>
-);
 
 export default AdminDashboard;

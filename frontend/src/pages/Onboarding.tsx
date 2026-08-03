@@ -60,29 +60,34 @@ const Onboarding: React.FC = () => {
 
   const steps = ['Choose Exam', 'Target Year', 'Prep Level', 'Daily Study Time'];
 
+  const optionClass = (selected: boolean) =>
+    selected
+      ? 'border-lingo-blue bg-lingo-blue/10 ring-2 ring-lingo-blue/30'
+      : 'border-lingo-border hover:border-lingo-blue';
+
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-10">
-      <div className="w-full max-w-2xl bg-white rounded-xl shadow-md p-5 sm:p-8 mx-4">
+    <div className="min-h-screen bg-lingo-bg flex items-center justify-center py-10">
+      <div className="w-full max-w-2xl bg-white rounded-2xl border-2 border-lingo-border shadow-lingo-sm p-5 sm:p-8 mx-4">
         <div className="text-center mb-6">
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Let's set up your prep</h1>
-          <p className="text-gray-500 mt-1 text-sm">Personalize your IBPS Coaching experience</p>
+          <h1 className="text-xl sm:text-2xl font-extrabold text-gray-900">Let's set up your prep</h1>
+          <p className="text-gray-500 mt-1 text-sm font-semibold">Personalize your IBPS Coaching experience</p>
         </div>
 
         {/* Stepper */}
         <div className="flex items-center justify-center gap-1 sm:gap-2 mb-6 overflow-x-auto pb-1">
           {steps.map((s, i) => (
             <div key={s} className="flex items-center gap-1 sm:gap-2 shrink-0">
-              <div className={`h-8 w-8 rounded-full flex items-center justify-center text-sm font-medium ${i < step ? 'bg-green-500 text-white' : i === step ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-500'}`}>
+              <div className={`h-8 w-8 rounded-full flex items-center justify-center text-sm font-bold ${i < step ? 'bg-lingo-green text-white' : i === step ? 'bg-lingo-green text-white border-2 border-lingo-green-dark' : 'bg-lingo-bg text-gray-500 border-2 border-lingo-border'}`}>
                 {i < step ? '✓' : i + 1}
               </div>
-              <span className={`text-xs ${i === step ? 'text-blue-600 font-medium' : 'text-gray-500'} hidden sm:inline`}>{s}</span>
-              {i < steps.length - 1 && <div className={`h-0.5 w-6 ${i < step ? 'bg-green-500' : 'bg-gray-200'}`} />}
+              <span className={`text-xs ${i === step ? 'text-lingo-green-dark font-extrabold' : 'text-gray-500 font-semibold'} hidden sm:inline`}>{s}</span>
+              {i < steps.length - 1 && <div className={`h-1 w-6 rounded-full ${i < step ? 'bg-lingo-green' : 'bg-lingo-border'}`} />}
             </div>
           ))}
         </div>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4 text-sm">
+          <div className="bg-lingo-red/10 border-2 border-lingo-red text-lingo-red px-4 py-3 rounded-xl mb-4 text-sm font-bold">
             {error}
           </div>
         )}
@@ -90,15 +95,15 @@ const Onboarding: React.FC = () => {
         {/* Step 0: Exam */}
         {step === 0 && (
           <div>
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Which exam are you preparing for?</h2>
+            <h2 className="text-lg font-extrabold text-gray-900 mb-4">Which exam are you preparing for?</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {EXAMS.map(exam => (
                 <button
                   key={exam}
                   onClick={() => setExamGoal(exam)}
-                  className={`p-4 rounded-lg border text-left transition-colors ${exam_goal === exam ? 'border-blue-600 bg-blue-50 ring-2 ring-blue-200' : 'border-gray-200 hover:border-blue-300'}`}
+                  className={`p-4 rounded-xl border-2 text-left transition-colors ${optionClass(exam_goal === exam)}`}
                 >
-                  <span className="font-medium text-gray-900">{exam}</span>
+                  <span className="font-extrabold text-gray-900">{exam}</span>
                 </button>
               ))}
             </div>
@@ -108,12 +113,12 @@ const Onboarding: React.FC = () => {
         {/* Step 1: Target year */}
         {step === 1 && (
           <div>
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">What's your target exam year?</h2>
-            <p className="text-sm text-gray-500 mb-4">We'll calibrate the study plan around your deadline.</p>
+            <h2 className="text-lg font-extrabold text-gray-900 mb-4">What's your target exam year?</h2>
+            <p className="text-sm text-gray-500 font-semibold mb-4">We'll calibrate the study plan around your deadline.</p>
             <select
               value={target_year}
               onChange={(e) => setTargetYear(parseInt(e.target.value, 10))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 border-2 border-lingo-border rounded-xl focus:outline-none focus:ring-2 focus:ring-lingo-blue focus:border-lingo-blue bg-white font-semibold"
             >
               {[new Date().getFullYear(), new Date().getFullYear() + 1, new Date().getFullYear() + 2].map(y => (
                 <option key={y} value={y}>{y}</option>
@@ -125,16 +130,16 @@ const Onboarding: React.FC = () => {
         {/* Step 2: Prep level */}
         {step === 2 && (
           <div>
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">How would you describe your current preparation level?</h2>
+            <h2 className="text-lg font-extrabold text-gray-900 mb-4">How would you describe your current preparation level?</h2>
             <div className="space-y-3">
               {LEVELS.map(level => (
                 <button
                   key={level.id}
                   onClick={() => setPrepLevel(level.id)}
-                  className={`w-full p-4 rounded-lg border text-left transition-colors ${prep_level === level.id ? 'border-blue-600 bg-blue-50 ring-2 ring-blue-200' : 'border-gray-200 hover:border-blue-300'}`}
+                  className={`w-full p-4 rounded-xl border-2 text-left transition-colors ${optionClass(prep_level === level.id)}`}
                 >
-                  <span className="block font-medium text-gray-900">{level.title}</span>
-                  <span className="block text-sm text-gray-500 mt-0.5">{level.desc}</span>
+                  <span className="block font-extrabold text-gray-900">{level.title}</span>
+                  <span className="block text-sm text-gray-500 font-semibold mt-0.5">{level.desc}</span>
                 </button>
               ))}
             </div>
@@ -144,17 +149,17 @@ const Onboarding: React.FC = () => {
         {/* Step 3: Daily study time */}
         {step === 3 && (
           <div>
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">How much time can you study daily?</h2>
-            <p className="text-sm text-gray-500 mb-4">We'll size your daily practice targets around this.</p>
+            <h2 className="text-lg font-extrabold text-gray-900 mb-4">How much time can you study daily?</h2>
+            <p className="text-sm text-gray-500 font-semibold mb-4">We'll size your daily practice targets around this.</p>
             <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
               {TIME_SLOTS.map(t => (
                 <button
                   key={t}
                   onClick={() => setDailyMinutes(t)}
-                  className={`p-4 rounded-lg border text-center transition-colors ${daily_study_minutes === t ? 'border-blue-600 bg-blue-50 ring-2 ring-blue-200' : 'border-gray-200 hover:border-blue-300'}`}
+                  className={`p-4 rounded-xl border-2 text-center transition-colors ${optionClass(daily_study_minutes === t)}`}
                 >
-                  <span className="block font-bold text-gray-900 text-lg">{t}</span>
-                  <span className="block text-xs text-gray-500">min</span>
+                  <span className="block font-extrabold text-gray-900 text-lg">{t}</span>
+                  <span className="block text-xs text-gray-500 font-semibold">min</span>
                 </button>
               ))}
             </div>
@@ -163,7 +168,7 @@ const Onboarding: React.FC = () => {
                 type="number"
                 value={daily_study_minutes}
                 onChange={(e) => setDailyMinutes(parseInt(e.target.value, 10))}
-                className="mt-4 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="mt-4 w-full px-4 py-3 border-2 border-lingo-border rounded-xl focus:outline-none focus:ring-2 focus:ring-lingo-blue focus:border-lingo-blue bg-white font-semibold"
                 placeholder="Custom minutes"
               />
             )}
@@ -171,11 +176,11 @@ const Onboarding: React.FC = () => {
         )}
 
         {/* Nav */}
-        <div className="flex items-center justify-between mt-8 pt-6 border-t border-gray-100">
+        <div className="flex items-center justify-between mt-8 pt-6 border-t-2 border-lingo-border">
           <button
             onClick={() => setStep(s => Math.max(0, s - 1))}
             disabled={step === 0}
-            className="px-4 py-2 text-gray-600 hover:text-gray-900 disabled:opacity-40 text-sm font-medium"
+            className="px-4 py-2 text-gray-600 hover:text-gray-900 disabled:opacity-40 text-sm font-extrabold"
           >
             ← Back
           </button>
@@ -183,7 +188,7 @@ const Onboarding: React.FC = () => {
             <button
               onClick={() => setStep(s => s + 1)}
               disabled={!canNext()}
-              className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-40 text-sm font-medium"
+              className="lingo-btn lingo-btn-blue disabled:opacity-40"
             >
               Continue
             </button>
@@ -191,7 +196,7 @@ const Onboarding: React.FC = () => {
             <button
               onClick={handleFinish}
               disabled={saving}
-              className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 text-sm font-medium"
+              className="lingo-btn lingo-btn-green disabled:opacity-50"
             >
               {saving ? 'Saving...' : 'Finish & Go to Dashboard'}
             </button>

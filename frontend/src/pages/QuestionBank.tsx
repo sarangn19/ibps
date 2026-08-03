@@ -2,7 +2,8 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../utils/api';
 import { Question, SubjectTree } from '../types';
-import { ArrowLeft, Search, Trash2, Eye, X, Plus } from 'lucide-react';
+import PageHeader from '../components/PageHeader';
+import { Search, Trash2, Eye, X, Plus } from 'lucide-react';
 
 const emptyForm = () => ({
   subject: '', topic: '', subtopic: '', difficulty: 'medium',
@@ -111,6 +112,7 @@ const QuestionBank: React.FC = () => {
 
   const remove = async (id: number) => {
     if (deletingId) return;
+    if (!window.confirm('Delete this question permanently?')) return;
     setDeletingId(id);
     try {
       await api.delete(`/admin/questions/${id}`);
@@ -128,15 +130,11 @@ const QuestionBank: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <button onClick={() => navigate('/admin')} className="flex items-center gap-1 text-gray-600 hover:text-gray-900">
-              <ArrowLeft className="h-4 w-4" /><span className="text-sm">Back</span>
-            </button>
-            <h1 className="text-lg font-bold text-gray-900">Question Bank</h1>
-            <span className="text-sm text-gray-500">{total} questions</span>
-          </div>
+      <PageHeader
+        title="Question Bank"
+        wide
+        onBack={() => navigate('/admin')}
+        right={
           <div className="flex items-center gap-2">
             <button onClick={() => navigate('/admin/tests/generate')} className="flex items-center gap-2 px-4 py-2 bg-white border text-sm text-gray-700 rounded-lg hover:bg-gray-50">
               <Plus className="h-4 w-4" /> Generate Test
@@ -145,8 +143,8 @@ const QuestionBank: React.FC = () => {
               <Plus className="h-4 w-4" /> Add Question
             </button>
           </div>
-        </div>
-      </nav>
+        }
+      />
 
       <div className="max-w-7xl mx-auto px-4 py-6 space-y-4">
         {/* Stats */}

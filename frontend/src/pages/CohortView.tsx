@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../utils/api';
-import { ArrowLeft, Users, Inbox, Target, XCircle } from 'lucide-react';
+import PageHeader from '../components/PageHeader';
+import { Users, Inbox, Target, XCircle } from 'lucide-react';
 
 const CohortView: React.FC = () => {
   const navigate = useNavigate();
@@ -30,16 +31,13 @@ const CohortView: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <button onClick={() => navigate('/admin')} className="flex items-center gap-1 text-gray-600 hover:text-gray-900">
-              <ArrowLeft className="h-4 w-4" /><span className="text-sm">Back</span>
-            </button>
-            <h1 className="text-lg font-bold text-gray-900">Cohort Analytics</h1>
-          </div>
+      <PageHeader
+        title="Cohort Analytics"
+        wide
+        onBack={() => navigate('/admin')}
+        right={
           <div className="flex items-center gap-2 text-sm">
-            <label className="text-gray-600">Batch:</label>
+            <label className="text-gray-600 hidden sm:inline">Batch:</label>
             <select value={batchId} onChange={e => setBatchId(e.target.value)} className="border rounded-lg px-3 py-1.5">
               <option value="">All Batches</option>
               {batches.map(b => (
@@ -47,8 +45,8 @@ const CohortView: React.FC = () => {
               ))}
             </select>
           </div>
-        </div>
-      </nav>
+        }
+      />
 
       <div className="max-w-7xl mx-auto px-4 py-6 space-y-6">
         {/* Engagement stats */}

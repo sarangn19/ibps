@@ -2,13 +2,28 @@ export interface User {
   id: number;
   name: string;
   email: string;
-  role: 'student' | 'admin';
+  role: 'student' | 'admin' | 'superadmin';
   batch_id?: number;
   exam_goal?: string | null;
   target_year?: number | null;
   prep_level?: string | null;
   daily_study_minutes?: number | null;
   onboarding_completed?: boolean;
+  referral_code?: string | null;
+  referred_by?: number | null;
+}
+
+export interface AccessStatus {
+  allowed: boolean;
+  plan: 'staff' | 'trial' | 'monthly' | 'granted_free' | 'expired';
+  status: 'active' | 'trial' | 'expired';
+  trial_started_at: string | null;
+  trial_ends_at: string | null;
+  trial_days_left: number | null;
+  ends_at: string | null;
+  granted_by: number | null;
+  granted_at: string | null;
+  amount_per_month: number;
 }
 
 export interface StudyPlan {
@@ -143,4 +158,38 @@ export interface SubtopicNode {
   subtopic: string;
   total: number;
   by_difficulty: Record<string, number>;
+}
+
+export interface CaArticle {
+  id: number;
+  title: string;
+  description: string;
+  category: string;
+  source: string;
+  source_url: string;
+  link: string;
+  image_url: string | null;
+  pub_date: string | null;
+}
+
+export interface CaQuizQuestion {
+  id: number;
+  question_text: string;
+  option_a: string;
+  option_b: string;
+  option_c: string;
+  option_d: string;
+  option_e?: string;
+  correct_option: 'a' | 'b' | 'c' | 'd' | 'e';
+  explanation?: string;
+  category: string;
+  headline?: string;
+  link?: string;
+  pub_date?: string | null;
+}
+
+export interface CaStats {
+  articles: number;
+  quiz_questions: number;
+  by_category: { category: string; count: number }[];
 }

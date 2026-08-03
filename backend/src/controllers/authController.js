@@ -1,10 +1,16 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const pool = require('../database/db');
+const { ensureSchema: ensureSuperadminSchema } = require('../services/superadminService');
+const { getAccessForUser } = require('../services/subscriptionService');
+const { ensureSchema: ensureReferralSchema, nextUniqueCode, resolveReferrer } = require('../services/referralService');
 
 const register = async (req, res) => {
   try {
-    const { name, email, password, role = 'student', batch_id } = req.body;
+    const { name, email, password, batch_id, referral_code } = req.body;
+    // Role is always 'student' on public registration; admin/superadmin are
+    // created only by superadmins via the superadmin endpoints.
+    const role = 'student';
 
     const existingUser = await pool.query(
       'SELECT id FROM users WHERE email = ?',
@@ -17,9 +23,13 @@ const register = async (req, res) => {
 
     const password_hash = await bcrypt.hash(password, 10);
 
+    await ensureReferralSchema();
+    const newCode = await nextUniqueCode();
+    const referrerId = await resolveReferrer(referral_code);
+
     const result = await pool.query(
-      'INSERT INTO users (name, email, password_hash, role, batch_id) VALUES (?, ?, ?, ?, ?) RETURNING id, name, email, role, batch_id, exam_goal, target_year, prep_level, daily_study_minutes, onboarding_completed',
-      [name, email, password_hash, role, batch_id]
+      'INSERT INTO users (name, email, password_hash, role, batch_id, referral_code, referred_by) VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING id, name, email, role, batch_id, exam_goal, target_year, prep_level, daily_study_minutes, onboarding_completed, referral_code, referred_by',
+      [name, email, password_hash, role, batch_id, newCode, referrerId]
     );
 
     const user = result.rows[0];
@@ -31,7 +41,9 @@ const register = async (req, res) => {
       { expiresIn: process.env.JWT_EXPIRES_IN }
     );
 
-    res.status(201).json({ user, token });
+    const access = await getAccessForUser(user.id);
+
+    res.status(201).json({ user, token, access });
   } catch (error) {
     console.error('Registration error:', error);
     res.status(500).json({ error: 'Registration failed' });
@@ -41,6 +53,10 @@ const register = async (req, res) => {
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
+
+    // Run the superadmin role migration/bootstrap on login so the first admin
+    // is promoted deterministically (boot-time migration can race on cold start).
+    try { await ensureSuperadminSchema(); } catch (e) { console.error('ensureSuperadminSchema in login failed:', e); }
 
     const result = await pool.query(
       'SELECT * FROM users WHERE email = ?',
@@ -69,6 +85,8 @@ const login = async (req, res) => {
       [user.id, 'login', JSON.stringify({ timestamp: new Date().toISOString() })]
     );
 
+    const access = await getAccessForUser(user.id);
+
     res.json({
       user: {
         id: user.id,
@@ -80,9 +98,12 @@ const login = async (req, res) => {
         target_year: user.target_year,
         prep_level: user.prep_level,
         daily_study_minutes: user.daily_study_minutes,
+        referral_code: user.referral_code,
+        referred_by: user.referred_by,
         onboarding_completed: user.onboarding_completed === true || user.onboarding_completed === 'true' || user.onboarding_completed === 1
       },
-      token
+      token,
+      access
     });
   } catch (error) {
     console.error('Login error:', error);
@@ -93,7 +114,7 @@ const login = async (req, res) => {
 const getMe = async (req, res) => {
   try {
     const result = await pool.query(
-      'SELECT id, name, email, role, batch_id, created_at, exam_goal, target_year, prep_level, daily_study_minutes, onboarding_completed FROM users WHERE id = ?',
+      'SELECT id, name, email, role, batch_id, created_at, exam_goal, target_year, prep_level, daily_study_minutes, onboarding_completed, referral_code, referred_by FROM users WHERE id = ?',
       [req.user.id]
     );
 
@@ -103,7 +124,8 @@ const getMe = async (req, res) => {
 
     const user = result.rows[0];
     user.onboarding_completed = user.onboarding_completed === true || user.onboarding_completed === 'true' || user.onboarding_completed === 1;
-    res.json(user);
+    const access = await getAccessForUser(req.user.id);
+    res.json({ user, access });
   } catch (error) {
     console.error('Get user error:', error);
     res.status(500).json({ error: 'Failed to fetch user' });

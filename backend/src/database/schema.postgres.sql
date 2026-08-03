@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS users (
   name TEXT NOT NULL,
   email TEXT UNIQUE NOT NULL,
   password_hash TEXT NOT NULL,
-  role TEXT NOT NULL CHECK (role IN ('student', 'admin')),
+  role TEXT NOT NULL CHECK (role IN ('student', 'admin', 'superadmin')),
   batch_id INTEGER REFERENCES batches(id),
   created_at TEXT DEFAULT (to_char(now(), 'YYYY-MM-DD HH24:MI:SS'))
 );
@@ -145,3 +145,37 @@ CREATE INDEX IF NOT EXISTS idx_question_responses_question_id ON question_respon
 CREATE INDEX IF NOT EXISTS idx_activity_logs_user_id ON activity_logs(user_id);
 CREATE INDEX IF NOT EXISTS idx_student_topic_mastery_user_id ON student_topic_mastery(user_id);
 CREATE INDEX IF NOT EXISTS idx_questions_subject_topic ON questions(subject, topic);
+
+CREATE TABLE IF NOT EXISTS current_affairs (
+  id BIGSERIAL PRIMARY KEY,
+  title TEXT NOT NULL,
+  description TEXT,
+  content TEXT,
+  category TEXT,
+  source TEXT,
+  source_url TEXT,
+  link TEXT,
+  image_url TEXT,
+  pub_date TEXT,
+  fetched_at TEXT DEFAULT (to_char(now(), 'YYYY-MM-DD HH24:MI:SS')),
+  UNIQUE(link)
+);
+
+CREATE TABLE IF NOT EXISTS ca_quiz_questions (
+  id BIGSERIAL PRIMARY KEY,
+  ca_item_id INTEGER REFERENCES current_affairs(id),
+  question_text TEXT NOT NULL,
+  option_a TEXT NOT NULL,
+  option_b TEXT NOT NULL,
+  option_c TEXT NOT NULL,
+  option_d TEXT NOT NULL,
+  option_e TEXT,
+  correct_option TEXT NOT NULL CHECK (correct_option IN ('a', 'b', 'c', 'd', 'e')),
+  explanation TEXT,
+  category TEXT,
+  created_at TEXT DEFAULT (to_char(now(), 'YYYY-MM-DD HH24:MI:SS'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_current_affairs_pub_date ON current_affairs(pub_date);
+CREATE INDEX IF NOT EXISTS idx_current_affairs_category ON current_affairs(category);
+CREATE INDEX IF NOT EXISTS idx_ca_quiz_category ON ca_quiz_questions(category);

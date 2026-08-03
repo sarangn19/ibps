@@ -5,6 +5,7 @@ import { Test, TestHistory, SubjectTree, StudyPlan } from '../types';
 import api from '../utils/api';
 import ExpertiseMap from '../components/ExpertiseMap';
 import MobileNav from '../components/MobileNav';
+import PageHeader from '../components/PageHeader';
 import { BookOpen, Clock, BarChart3, Award, TrendingUp, Target, Zap, Brain, Calendar } from 'lucide-react';
 
 interface Recommendation {
@@ -19,7 +20,7 @@ interface Recommendation {
 }
 
 const Dashboard: React.FC = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, access } = useAuth();
   const navigate = useNavigate();
   const [tests, setTests] = useState<Test[]>([]);
   const [history, setHistory] = useState<Record<number, TestHistory>>({});
@@ -115,49 +116,100 @@ const Dashboard: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-lingo-bg">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
-          <p className="mt-3 text-gray-600">Loading your dashboard...</p>
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-lingo-border border-t-lingo-green"></div>
+          <p className="mt-3 text-gray-600 font-bold">Loading your dashboard...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-sm border-b sticky top-0 z-10">
-        <div className="max-w-lg mx-auto px-4 h-14 flex justify-between items-center">
-          <h1 className="text-lg font-bold text-gray-900">IBPS Coaching</h1>
-          <div className="flex items-center space-x-3">
-            <span className="text-sm text-gray-600 hidden sm:inline">{user?.name}</span>
-            <button onClick={logout} className="text-sm text-red-600 hover:text-red-700 touch-target px-2">Logout</button>
+    <div className="min-h-screen bg-lingo-bg">
+      <PageHeader
+        title="IBPS Coaching"
+        showBack={false}
+        right={
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-bold text-gray-700 hidden sm:inline">{user?.name}</span>
+            <button onClick={logout} className="text-sm font-bold text-lingo-red hover:text-lingo-red-dark touch-target px-2">Logout</button>
           </div>
-        </div>
-      </nav>
+        }
+      />
 
-      <div className="max-w-lg mx-auto px-4 py-5 space-y-6 pb-nav">
+      <div className="max-w-lg mx-auto px-4 pt-5 space-y-6 pb-nav">
+
+        {/* Subscription banner (students only) */}
+        {user?.role === 'student' && access && (
+          access.allowed ? (
+            access.plan === 'trial' ? (
+              <div className="flex items-center justify-between gap-3 lingo-card p-4 border-lingo-blue">
+                <div className="flex items-center gap-2.5">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-lingo-blue/15 text-lingo-blue-dark">
+                    <Zap className="h-5 w-5" />
+                  </span>
+                  <div>
+                    <p className="text-sm font-extrabold text-gray-900">Free trial: {access.trial_days_left} day{access.trial_days_left === 1 ? '' : 's'} left</p>
+                    <p className="text-xs text-gray-500 font-semibold">Upgrade anytime for ₹{access.amount_per_month}/month</p>
+                  </div>
+                </div>
+                <button onClick={() => navigate('/subscribe')} className="shrink-0 lingo-btn lingo-btn-green text-xs px-3 py-2">Upgrade</button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2.5 lingo-card p-4">
+                <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-lingo-green/15 text-lingo-green-dark">
+                  <Award className="h-5 w-5" />
+                </span>
+                <div>
+                  <p className="text-sm font-extrabold text-gray-900">
+                    {access.plan === 'granted_free' ? 'Free subscription active' : 'Pro subscription active'}
+                  </p>
+                  <p className="text-xs text-gray-500 font-semibold">
+                    {access.ends_at
+                      ? `Valid till ${new Date(access.ends_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}`
+                      : 'Unlimited access'}
+                  </p>
+                </div>
+              </div>
+            )
+          ) : (
+            <div className="flex items-center justify-between gap-3 lingo-card p-4 border-lingo-red">
+              <div className="flex items-center gap-2.5">
+                <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-lingo-red/15 text-lingo-red">
+                  <Zap className="h-5 w-5" />
+                </span>
+                <div>
+                  <p className="text-sm font-extrabold text-gray-900">Your free trial has ended</p>
+                  <p className="text-xs text-gray-500 font-semibold">Subscribe to keep practicing</p>
+                </div>
+              </div>
+              <button onClick={() => navigate('/subscribe')} className="shrink-0 lingo-btn lingo-btn-red text-xs px-3 py-2">Subscribe</button>
+            </div>
+          )
+        )}
 
         {/* Practice Your Weak Areas */}
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl shadow-md p-6 text-white">
+        <div className="lingo-card p-5">
           <div className="flex items-start justify-between">
             <div>
               <div className="flex items-center space-x-2 mb-2">
-                <Target className="h-5 w-5" />
-                <h2 className="text-lg font-semibold">Practice Your Weak Areas</h2>
+                <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-lingo-orange text-white">
+                  <Target className="h-5 w-5" />
+                </span>
+                <h2 className="text-lg font-extrabold text-gray-900">Practice Your Weak Areas</h2>
               </div>
-              <p className="text-blue-100 text-sm max-w-lg">
+              <p className="text-gray-600 text-sm max-w-lg">
                 Focus on the topics where you need the most improvement. Pick a subject below to drill down by topic.
               </p>
             </div>
-            <span className="px-3 py-1 bg-white/20 rounded-full text-xs font-medium">Phase 2 — Coming Soon</span>
           </div>
           <div className="mt-4 flex flex-wrap gap-2">
             {subjects.slice(0, 5).map(s => (
               <button
                 key={s.subject}
                 onClick={() => handleStartPractice(s.subject)}
-                className="px-4 py-2 bg-white/15 hover:bg-white/25 rounded-lg text-sm transition-colors"
+                className="px-4 py-2 bg-lingo-green/15 text-lingo-green-dark hover:bg-lingo-green hover:text-white rounded-xl text-sm font-bold transition-colors"
               >
                 {s.subject}
               </button>
@@ -168,20 +220,20 @@ const Dashboard: React.FC = () => {
         {/* Recommended for You */}
         {recommendations.length > 0 && (
           <div>
-            <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2 mb-3">
-              <Zap className="h-5 w-5 text-amber-500" />
+            <h2 className="text-xl font-extrabold text-gray-900 flex items-center gap-2 mb-3">
+              <Zap className="h-5 w-5 text-lingo-yellow-dark" />
               Recommended for You
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {recommendations.map(rec => (
-                <div key={`${rec.subject}|${rec.topic}|${rec.subtopic}`} className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 hover:shadow-md transition-shadow">
+                <div key={`${rec.subject}|${rec.topic}|${rec.subtopic}`} className="lingo-card p-4 hover:-translate-y-0.5 transition-transform">
                   <div className="flex items-start justify-between mb-2">
                     <div>
                       <p className="text-xs text-gray-500">{rec.subject}</p>
-                      <p className="font-medium text-gray-900 text-sm">{rec.topic}</p>
+                      <p className="font-bold text-gray-900 text-sm">{rec.topic}</p>
                       <p className="text-xs text-gray-600">{rec.subtopic}</p>
                     </div>
-                    <span className={`px-2 py-0.5 ${rec.classification === 'not_attempted' ? 'bg-gray-100 text-gray-600' : rec.classification === 'developing' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'} text-xs rounded-full font-medium`}>
+                    <span className={`px-2 py-0.5 ${rec.classification === 'not_attempted' ? 'bg-lingo-border text-gray-600' : rec.classification === 'developing' ? 'bg-lingo-yellow/20 text-lingo-yellow-dark' : 'bg-lingo-red/15 text-lingo-red'} text-xs rounded-xl font-bold uppercase`}>
                       {rec.classification === 'not_attempted' ? 'New' : rec.classification === 'developing' ? 'Developing' : 'Weak'}
                     </span>
                   </div>
@@ -193,7 +245,7 @@ const Dashboard: React.FC = () => {
                       if (rec.scope.subtopic) p.set('subtopic', rec.scope.subtopic);
                       navigate(`/practice/start?${p.toString()}`);
                     }}
-                    className="w-full py-1.5 bg-amber-500 text-white text-sm rounded-md hover:bg-amber-600"
+                    className="w-full py-1.5 bg-lingo-orange text-white text-sm rounded-xl font-bold hover:bg-lingo-orange-dark"
                   >
                     Practice Now
                   </button>
@@ -206,24 +258,24 @@ const Dashboard: React.FC = () => {
         {/* Your Study Plan */}
         {studyPlan && (
           <div>
-            <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2 mb-3">
-              <Calendar className="h-5 w-5 text-green-600" />
+            <h2 className="text-xl font-extrabold text-gray-900 flex items-center gap-2 mb-3">
+              <Calendar className="h-5 w-5 text-lingo-green" />
               Your Weekly Study Plan
             </h2>
-            <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-5">
+            <div className="lingo-card p-5">
               <div className="flex flex-wrap gap-3 mb-4 text-sm">
-                <span className="px-3 py-1 bg-green-50 text-green-700 rounded-full font-medium">{studyPlan.exam_goal} {studyPlan.target_year}</span>
-                <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full capitalize">{studyPlan.prep_level}</span>
-                <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full">~{studyPlan.questions_per_day} questions/day</span>
+                <span className="lingo-chip bg-lingo-green/15 text-lingo-green-dark">{studyPlan.exam_goal} {studyPlan.target_year}</span>
+                <span className="lingo-chip bg-lingo-bg text-gray-700 capitalize">{studyPlan.prep_level}</span>
+                <span className="lingo-chip bg-lingo-bg text-gray-700">~{studyPlan.questions_per_day} questions/day</span>
                 {studyPlan.avg_accuracy !== null && (
-                  <span className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full">Avg accuracy {studyPlan.avg_accuracy}%</span>
+                  <span className="lingo-chip bg-lingo-blue/15 text-lingo-blue-dark">Avg accuracy {studyPlan.avg_accuracy}%</span>
                 )}
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                 {studyPlan.weekly_plan.slice(0, 4).map(d => (
-                  <div key={d.day} className="border border-gray-100 rounded-lg p-3">
-                    <p className="text-xs font-semibold text-green-600 uppercase">{d.day_name}</p>
-                    <p className="font-medium text-gray-900 text-sm mt-1">{d.focus_subject}</p>
+                  <div key={d.day} className="border-2 border-lingo-border rounded-xl p-3">
+                    <p className="text-xs font-bold text-lingo-green-dark uppercase">{d.day_name}</p>
+                    <p className="font-bold text-gray-900 text-sm mt-1">{d.focus_subject}</p>
                     <p className="text-xs text-gray-600">{d.topics.join(', ')}</p>
                     <p className="text-xs text-gray-500 mt-2">{d.questions_to_practice} questions</p>
                   </div>
@@ -237,15 +289,15 @@ const Dashboard: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Available Tests */}
           <div className="lg:col-span-2 space-y-4">
-            <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-              <BookOpen className="h-5 w-5 text-blue-600" />
+            <h2 className="text-xl font-extrabold text-gray-900 flex items-center gap-2">
+              <BookOpen className="h-5 w-5 text-lingo-blue-dark" />
               Available Tests
             </h2>
 
             {tests.length === 0 ? (
-              <div className="text-center py-12 bg-white rounded-lg shadow">
+              <div className="text-center py-12 lingo-card">
                 <BookOpen className="mx-auto h-10 w-10 text-gray-400" />
-                <p className="mt-2 text-gray-600">No tests available yet.</p>
+                <p className="mt-2 text-gray-600 font-bold">No tests available yet.</p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -254,16 +306,16 @@ const Dashboard: React.FC = () => {
                   const lastAttempt = h?.last_attempt;
                   const pendingAttempt = h?.attempts?.find(a => a.status === 'in_progress');
                   return (
-                    <div key={test.id} className="bg-white rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                    <div key={test.id} className="lingo-card hover:-translate-y-0.5 transition-transform">
                       <div className="p-5">
                         <div className="flex items-start justify-between mb-3">
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-1">
-                              <h3 className="font-semibold text-gray-900">{test.title}</h3>
-                              <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${typeColor(test.type)}`}>
+                              <h3 className="font-extrabold text-gray-900">{test.title}</h3>
+                              <span className={`px-2 py-0.5 text-xs font-bold rounded-xl uppercase ${typeColor(test.type)}`}>
                                 {typeLabel(test.type)}
                               </span>
-                              <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${stageColor(test.exam_stage)}`}>
+                              <span className={`px-2 py-0.5 text-xs font-bold rounded-xl uppercase ${stageColor(test.exam_stage)}`}>
                                 {test.exam_stage}
                               </span>
                             </div>
@@ -278,10 +330,10 @@ const Dashboard: React.FC = () => {
                             )}
                           </div>
                           <div className="flex items-center gap-2">
-                            {h?.best_score !== null && (
+                            {h?.best_score != null && (
                               <div className="text-right">
                                 <p className="text-xs text-gray-500">Best</p>
-                                <p className="text-sm font-bold text-blue-600">{h?.best_score?.toFixed(1)}</p>
+                                <p className="text-sm font-extrabold text-lingo-blue-dark">{h?.best_score?.toFixed(1)}</p>
                               </div>
                             )}
                           </div>
@@ -291,7 +343,7 @@ const Dashboard: React.FC = () => {
                           <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" />{test.duration_minutes}min</span>
                           <span className="flex items-center gap-1"><BarChart3 className="h-3.5 w-3.5" />{Array.isArray(test.question_ids) ? test.question_ids.length : 0} Qs</span>
                           {test.negative_marking_ratio > 0 && (
-                            <span className="text-amber-600">-{(test.negative_marking_ratio * 100).toFixed(0)}% neg</span>
+                            <span className="text-lingo-orange-dark font-bold">-{(test.negative_marking_ratio * 100).toFixed(0)}% neg</span>
                           )}
                         </div>
 
@@ -300,13 +352,13 @@ const Dashboard: React.FC = () => {
                             <>
                               <button
                                 onClick={() => navigate(`/test/${test.id}`)}
-                                className="px-4 py-1.5 bg-amber-500 text-white text-sm rounded-md hover:bg-amber-600"
+                                className="px-4 py-2 bg-lingo-green text-white text-sm rounded-xl font-bold border-b-4 border-lingo-green-dark hover:bg-lingo-green-dark active:scale-[0.97]"
                               >
                                 Resume Test
                               </button>
                               <button
                                 onClick={() => navigate(`/results/${pendingAttempt.attempt_id!}`)}
-                                className="px-4 py-1.5 bg-gray-100 text-gray-700 text-sm rounded-md hover:bg-gray-200"
+                                className="px-4 py-2 bg-lingo-bg text-gray-700 text-sm rounded-xl font-bold border-b-4 border-lingo-border hover:bg-lingo-border/60 active:scale-[0.97]"
                               >
                                 View Progress
                               </button>
@@ -314,7 +366,7 @@ const Dashboard: React.FC = () => {
                           ) : (
                             <button
                               onClick={() => handleStartTest(test.id)}
-                              className="px-4 py-1.5 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700"
+                              className="px-4 py-2 bg-lingo-blue text-white text-sm rounded-xl font-bold border-b-4 border-lingo-blue-dark hover:bg-lingo-blue-dark active:scale-[0.97]"
                             >
                               {lastAttempt ? 'Retake' : 'Start Test'}
                             </button>
@@ -322,7 +374,7 @@ const Dashboard: React.FC = () => {
                           {h?.attempts?.filter(a => a.status === 'completed').length > 0 && (
                             <button
                               onClick={() => { const completed = h.attempts.filter(x => x.status === 'completed'); if (completed.length > 0) handleViewResults(completed[0].attempt_id!); }}
-                              className="px-4 py-1.5 bg-gray-100 text-gray-700 text-sm rounded-md hover:bg-gray-200"
+                              className="px-4 py-2 bg-lingo-bg text-gray-700 text-sm rounded-xl font-bold border-b-4 border-lingo-border hover:bg-lingo-border/60 active:scale-[0.97]"
                             >
                               View Last Results
                             </button>
@@ -338,8 +390,8 @@ const Dashboard: React.FC = () => {
 
           {/* Expertise Map sidebar */}
           <div className="space-y-4">
-            <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-              <Brain className="h-5 w-5 text-indigo-600" />
+            <h2 className="text-xl font-extrabold text-gray-900 flex items-center gap-2">
+              <Brain className="h-5 w-5 text-lingo-purple-dark" />
               Your Expertise Map
             </h2>
             <p className="text-xs text-gray-500">Live mastery tracking — updates as you practice</p>
@@ -349,36 +401,36 @@ const Dashboard: React.FC = () => {
 
         {/* Quick Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
-            <div className="flex items-center gap-2 text-blue-600 mb-1">
+          <div className="lingo-card p-4">
+            <div className="flex items-center gap-2 text-lingo-blue-dark mb-1">
               <BarChart3 className="h-4 w-4" />
-              <span className="text-xs font-medium uppercase tracking-wide">Tests</span>
+              <span className="text-xs font-extrabold uppercase tracking-wide">Tests</span>
             </div>
-            <p className="text-2xl font-bold text-gray-900">{Object.values(history).filter(h => h.attempts?.length > 0).length}</p>
+            <p className="text-2xl font-extrabold text-gray-900">{Object.values(history).filter(h => h.attempts?.length > 0).length}</p>
             <p className="text-xs text-gray-500">attempted</p>
           </div>
-          <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
-            <div className="flex items-center gap-2 text-green-600 mb-1">
+          <div className="lingo-card p-4">
+            <div className="flex items-center gap-2 text-lingo-green-dark mb-1">
               <Award className="h-4 w-4" />
-              <span className="text-xs font-medium uppercase tracking-wide">Subjects</span>
+              <span className="text-xs font-extrabold uppercase tracking-wide">Subjects</span>
             </div>
-            <p className="text-2xl font-bold text-gray-900">{subjects.length}</p>
+            <p className="text-2xl font-extrabold text-gray-900">{subjects.length}</p>
             <p className="text-xs text-gray-500">available</p>
           </div>
-          <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
-            <div className="flex items-center gap-2 text-purple-600 mb-1">
+          <div className="lingo-card p-4">
+            <div className="flex items-center gap-2 text-lingo-purple-dark mb-1">
               <TrendingUp className="h-4 w-4" />
-              <span className="text-xs font-medium uppercase tracking-wide">Topics</span>
+              <span className="text-xs font-extrabold uppercase tracking-wide">Topics</span>
             </div>
-            <p className="text-2xl font-bold text-gray-900">{subjects.reduce((s, sub) => s + sub.topics.length, 0)}</p>
+            <p className="text-2xl font-extrabold text-gray-900">{subjects.reduce((s, sub) => s + sub.topics.length, 0)}</p>
             <p className="text-xs text-gray-500">to practice</p>
           </div>
-          <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
-            <div className="flex items-center gap-2 text-amber-600 mb-1">
+          <div className="lingo-card p-4">
+            <div className="flex items-center gap-2 text-lingo-orange-dark mb-1">
               <Target className="h-4 w-4" />
-              <span className="text-xs font-medium uppercase tracking-wide">Questions</span>
+              <span className="text-xs font-extrabold uppercase tracking-wide">Questions</span>
             </div>
-            <p className="text-2xl font-bold text-gray-900">{subjects.reduce((s, sub) => s + sub.topics.reduce((st, t) => st + t.subtopics.reduce((ss, stt) => ss + stt.total, 0), 0), 0)}</p>
+            <p className="text-2xl font-extrabold text-gray-900">{subjects.reduce((s, sub) => s + sub.topics.reduce((st, t) => st + t.subtopics.reduce((ss, stt) => ss + stt.total, 0), 0), 0)}</p>
             <p className="text-xs text-gray-500">in bank</p>
           </div>
         </div>

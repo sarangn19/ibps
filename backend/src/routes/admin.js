@@ -5,6 +5,7 @@ const { getStudents, getStudentDetail, getCohort, getFlags, getBatches } = requi
 const { uploadQuestions, downloadTemplate } = require('../controllers/questionUploadController');
 const { getQuestions, getAdminQuestions, getQuestionStats, getQuestionById, updateQuestion, deleteQuestion, getSubjects } = require('../controllers/questionController');
 const { generateTest } = require('../controllers/adminTestController');
+const { listSubscriptions, grantSubscription, revokeSubscription } = require('../controllers/subscriptionController');
 const { auth, adminOnly } = require('../middleware/auth');
 
 const upload = multer({
@@ -28,6 +29,9 @@ router.post('/questions/upload', auth, adminOnly, upload.single('file'), uploadQ
 
 router.get('/questions/stats', auth, adminOnly, getQuestionStats);
 router.post('/tests/generate', auth, adminOnly, generateTest);
+router.get('/subscriptions', auth, adminOnly, listSubscriptions);
+router.post('/subscriptions/grant', auth, adminOnly, grantSubscription);
+router.post('/subscriptions/revoke', auth, adminOnly, revokeSubscription);
 router.get('/questions', auth, adminOnly, getAdminQuestions);
 router.get('/questions/subjects/tree', auth, adminOnly, getSubjects);
 router.get('/questions/:id', auth, adminOnly, getQuestionById);

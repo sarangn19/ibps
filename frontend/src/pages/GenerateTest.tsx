@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../utils/api';
 import { SubjectTree } from '../types';
-import { ArrowLeft, Plus, X, Sparkles } from 'lucide-react';
+import PageHeader from '../components/PageHeader';
+import { Plus, X, Sparkles } from 'lucide-react';
 
 interface SectionRow {
   subject: string;
@@ -86,20 +87,17 @@ const GenerateTest: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <button onClick={() => navigate('/admin')} className="flex items-center gap-1 text-gray-600 hover:text-gray-900">
-              <ArrowLeft className="h-4 w-4" /><span className="text-sm">Back</span>
-            </button>
-            <h1 className="text-lg font-bold text-gray-900">Generate Test</h1>
-          </div>
+      <PageHeader
+        title="Generate Test"
+        wide
+        onBack={() => navigate('/admin')}
+        right={
           <button onClick={handleGenerate} disabled={saving}
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:opacity-50">
             <Sparkles className="h-4 w-4" /> {saving ? 'Generating...' : 'Generate Test'}
           </button>
-        </div>
-      </nav>
+        }
+      />
 
       <div className="max-w-4xl mx-auto px-4 py-6 space-y-4">
         {/* Settings */}

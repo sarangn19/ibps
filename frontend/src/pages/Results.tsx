@@ -3,7 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Attempt, Test, QuestionResponse } from '../types';
 import api from '../utils/api';
 import MobileNav from '../components/MobileNav';
-import { CheckCircle, XCircle, ArrowLeft, TrendingUp } from 'lucide-react';
+import PageHeader from '../components/PageHeader';
+import { CheckCircle, XCircle, TrendingUp, ListChecks } from 'lucide-react';
 
 const Results: React.FC = () => {
   const { attemptId } = useParams<{ attemptId: string }>();
@@ -55,10 +56,10 @@ const Results: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-lingo-bg">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          <p className="mt-4 text-gray-600">Loading results...</p>
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-lingo-border border-t-lingo-green"></div>
+          <p className="mt-4 text-gray-600 font-bold">Loading results...</p>
         </div>
       </div>
     );
@@ -66,112 +67,96 @@ const Results: React.FC = () => {
 
   if (!attempt || !test) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-lingo-bg">
         <div className="text-center">
-          <p className="text-gray-600">Results not found</p>
+          <p className="text-gray-600 font-bold">Results not found</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-sm border-b">
-        <div className="max-w-lg mx-auto px-4">
-          <div className="flex justify-between h-14 items-center">
-            <div className="flex items-center space-x-4">
-              <button
-                onClick={() => navigate('/dashboard')}
-                className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 touch-target"
-              >
-                <ArrowLeft className="h-5 w-5" />
-                <span>Dashboard</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </nav>
+    <div className="min-h-screen bg-lingo-bg">
+      <PageHeader title="Test Results" onBack={() => navigate('/dashboard')} />
 
-      <div className="max-w-lg mx-auto px-4 py-6 pb-nav">
+      <div className="max-w-lg mx-auto px-4 pt-6 pb-nav">
         <div className="mb-6">
-          <h1 className="text-xl font-bold text-gray-900">{test.title}</h1>
-          <p className="text-gray-600 mt-0.5 text-sm">Test Results</p>
+          <h1 className="text-xl font-extrabold text-gray-900">{test.title}</h1>
+          <p className="text-gray-600 mt-0.5 text-sm font-semibold">Test Results</p>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+          <div className="lingo-card p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs text-gray-600">Score</p>
-                <p className="text-2xl font-bold text-gray-900">{score.total.toFixed(2)}</p>
+                <p className="text-xs text-gray-600 font-bold">Score</p>
+                <p className="text-2xl font-extrabold text-gray-900">{score.total.toFixed(2)}</p>
               </div>
-              <TrendingUp className="h-7 w-7 text-blue-600" />
+              <TrendingUp className="h-7 w-7 text-lingo-blue" />
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+          <div className="lingo-card p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs text-gray-600">Correct</p>
-                <p className="text-2xl font-bold text-green-600">{score.correct}</p>
+                <p className="text-xs text-gray-600 font-bold">Correct</p>
+                <p className="text-2xl font-extrabold text-lingo-green-dark">{score.correct}</p>
               </div>
-              <CheckCircle className="h-7 w-7 text-green-600" />
+              <CheckCircle className="h-7 w-7 text-lingo-green" />
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+          <div className="lingo-card p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs text-gray-600">Attempted</p>
-                <p className="text-2xl font-bold text-gray-900">{score.attempted}</p>
+                <p className="text-xs text-gray-600 font-bold">Attempted</p>
+                <p className="text-2xl font-extrabold text-gray-900">{score.attempted}</p>
               </div>
-              <div className="h-7 w-7 bg-blue-100 rounded-full flex items-center justify-center">
-                <span className="text-blue-600 font-semibold">{score.attempted}</span>
-              </div>
+              <ListChecks className="h-7 w-7 text-lingo-blue" />
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+          <div className="lingo-card p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs text-gray-600">Accuracy</p>
-                <p className="text-2xl font-bold text-purple-600">{score.accuracy}%</p>
+                <p className="text-xs text-gray-600 font-bold">Accuracy</p>
+                <p className="text-2xl font-extrabold text-lingo-purple-dark">{score.accuracy}%</p>
               </div>
-              <div className="h-7 w-7 bg-purple-100 rounded-full flex items-center justify-center">
-                <span className="text-purple-600 font-semibold">%</span>
+              <div className="h-7 w-7 bg-lingo-purple/15 rounded-full flex items-center justify-center">
+                <span className="text-lingo-purple-dark font-extrabold">%</span>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md">
-          <div className="p-6 border-b">
-            <h2 className="text-xl font-semibold text-gray-900">Question-wise Analysis</h2>
+        <div className="lingo-card overflow-hidden">
+          <div className="p-6 border-b-2 border-lingo-border">
+            <h2 className="text-xl font-extrabold text-gray-900">Question-wise Analysis</h2>
           </div>
 
-          <div className="divide-y">
+          <div className="divide-y divide-lingo-border">
             {responses.map((response, index) => (
               <div key={response.id} className="p-6">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center space-x-3">
-                    <span className="text-sm font-medium text-gray-500">Q{index + 1}</span>
+                    <span className="text-sm font-bold text-gray-500">Q{index + 1}</span>
                     {response.is_correct ? (
-                      <CheckCircle className="h-5 w-5 text-green-600" />
+                      <CheckCircle className="h-5 w-5 text-lingo-green" />
                     ) : (
-                      <XCircle className="h-5 w-5 text-red-600" />
+                      <XCircle className="h-5 w-5 text-lingo-red" />
                     )
                     }
                   </div>
                   <div className="flex items-center space-x-4">
                     {response.time_spent_seconds && (
-                      <span className="text-sm text-gray-600">
+                      <span className="text-sm text-gray-600 font-semibold">
                         {Math.floor(response.time_spent_seconds / 60)}m {response.time_spent_seconds % 60}s
                       </span>
                     )}
-                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                      response.difficulty === 'easy' ? 'bg-green-100 text-green-800' :
-                      response.difficulty === 'medium' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-red-100 text-red-800'
+                    <span className={`px-2 py-1 text-xs font-bold rounded-xl uppercase ${
+                      response.difficulty === 'easy' ? 'bg-lingo-green/15 text-lingo-green-dark' :
+                      response.difficulty === 'medium' ? 'bg-lingo-yellow/20 text-lingo-yellow-dark' :
+                      'bg-lingo-red/15 text-lingo-red'
                     }`}>
                       {response.difficulty}
                     </span>
@@ -179,38 +164,40 @@ const Results: React.FC = () => {
                 </div>
 
                 {response.set_stimulus && (
-                  <div className="mb-4 p-4 bg-indigo-50 border border-indigo-200 rounded-lg">
-                    <p className="text-[11px] font-semibold text-indigo-600 uppercase mb-2">
+                  <div className="mb-4 p-4 bg-lingo-purple/15 border-2 border-lingo-purple rounded-xl">
+                    <p className="text-[11px] font-bold text-lingo-purple-dark uppercase mb-2">
                       {response.set_title || 'Shared Information'}
                     </p>
-                    <p className="text-sm text-gray-800 whitespace-pre-wrap font-mono">{response.set_stimulus}</p>
+                    <p className="text-sm text-gray-800 whitespace-pre-wrap font-mono font-medium">{response.set_stimulus}</p>
                   </div>
                 )}
-                <p className="text-gray-900 mb-4 whitespace-pre-wrap">{response.question_text}</p>
+                <p className="text-gray-900 mb-4 whitespace-pre-wrap font-bold">{response.question_text}</p>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-4">
-                  {['a', 'b', 'c', 'd', 'e'].map((option) => {
+                  {(['a', 'b', 'c', 'd', 'e'] as const)
+                    .filter(option => (response[`option_${option}`] as string)?.trim())
+                    .map((option) => {
                     const isSelected = response.selected_option === option;
                     const isCorrect = response.correct_option === option;
 
                     return (
                       <div
                         key={option}
-                        className={`p-3 rounded-lg border-2 ${
+                        className={`p-3 rounded-xl border-2 ${
                           isCorrect
-                            ? 'border-green-500 bg-green-50'
+                            ? 'border-lingo-green bg-lingo-green/10'
                             : isSelected && !isCorrect
-                            ? 'border-red-500 bg-red-50'
-                            : 'border-gray-200'
+                            ? 'border-lingo-red bg-lingo-red/10'
+                            : 'border-lingo-border bg-white'
                         }`}
                       >
                         <div className="flex items-start space-x-2">
-                          <span className="font-semibold text-gray-700">{option.toUpperCase()}.</span>
-                          <span className="text-gray-900">
-                            {response[`option_${option}` as keyof QuestionResponse] as string}
+                          <span className="font-extrabold text-gray-700">{option.toUpperCase()}.</span>
+                          <span className="text-gray-900 font-medium">
+                            {response[`option_${option}`] as string}
                           </span>
-                          {isCorrect && <span className="ml-auto text-green-600 text-sm">✓ Correct</span>}
-                          {isSelected && !isCorrect && <span className="ml-auto text-red-600 text-sm">✗ Your answer</span>}
+                          {isCorrect && <span className="ml-auto text-lingo-green text-sm font-bold">✓ Correct</span>}
+                          {isSelected && !isCorrect && <span className="ml-auto text-lingo-red text-sm font-bold">✗ Your answer</span>}
                         </div>
                       </div>
                     );
@@ -218,21 +205,21 @@ const Results: React.FC = () => {
                 </div>
 
                 {response.explanation && (
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                    <h4 className="font-semibold text-blue-900 mb-2">Explanation</h4>
-                    <p className="text-blue-800 text-sm">{response.explanation}</p>
+                  <div className="bg-lingo-blue/10 border-2 border-lingo-blue rounded-xl p-4 mb-4">
+                    <h4 className="font-extrabold text-lingo-blue-dark mb-2">Explanation</h4>
+                    <p className="text-lingo-blue-dark text-sm font-medium">{response.explanation}</p>
                   </div>
                 )}
 
                 {!response.is_correct && response.selected_option && (
                   <div className="mt-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-bold text-gray-700 mb-2">
                       Why did you get this wrong?
                     </label>
                     <select
                       value={response.error_tag || ''}
                       onChange={(e) => handleUpdateErrorTag(response.id, e.target.value)}
-                      className="w-full max-w-xs px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full max-w-xs px-3 py-2 border-2 border-lingo-border rounded-xl focus:outline-none focus:ring-2 focus:ring-lingo-blue bg-white font-semibold"
                     >
                       <option value="">Select a reason...</option>
                       <option value="concept_gap">Concept Gap</option>

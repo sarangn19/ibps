@@ -1,12 +1,22 @@
 const pool = require('../database/db');
+const { ensureSchema } = require('../services/referralService');
 
 const getStudents = async (req, res) => {
   try {
+    await ensureSchema();
     const result = await pool.query(`
       SELECT u.id, u.name, u.email, u.batch_id, u.created_at, b.name as batch_name,
+        u.subscription_status, u.subscription_plan, u.subscription_ends_at,
+        u.subscription_granted_by, u.subscription_granted_at,
+        u.referral_code, u.referred_by,
+        (SELECT r.name FROM users r WHERE r.id = u.referred_by) as referred_by_name,
+        (SELECT COUNT(*) FROM users r WHERE r.referred_by = u.id) as referred_total,
+        (SELECT COUNT(*) FROM users r WHERE r.referred_by = u.id AND r.subscription_plan = 'monthly' AND r.subscription_status = 'active') as referred_paid,
         (SELECT COUNT(*) FROM attempts WHERE user_id = u.id AND status = 'completed') as tests_completed,
         (SELECT ROUND(AVG(total_score)::numeric, 2) FROM attempts WHERE user_id = u.id AND status = 'completed' AND total_score IS NOT NULL) as avg_score,
-        (SELECT MAX(a.started_at) FROM attempts a WHERE a.user_id = u.id) as last_active
+        (SELECT MAX(a.started_at) FROM attempts a WHERE a.user_id = u.id) as last_active,
+        (SELECT COUNT(*) FROM question_responses qr JOIN attempts a ON a.id = qr.attempt_id WHERE a.user_id = u.id AND qr.selected_option IS NOT NULL) as questions_attempted,
+        (SELECT MAX(qr.created_at) FROM question_responses qr JOIN attempts a ON a.id = qr.attempt_id WHERE a.user_id = u.id AND qr.selected_option IS NOT NULL) as last_attempt_at
       FROM users u
       LEFT JOIN batches b ON b.id = u.batch_id
       WHERE u.role = 'student'
@@ -29,7 +39,6 @@ const getStudentDetail = async (req, res) => {
     );
     if (userResult.rows.length === 0) return res.status(404).json({ error: 'Student not found' });
     const student = userResult.rows[0];
-
     const attemptsResult = await pool.query(`
       SELECT a.*, t.title as test_title, t.type as test_type
       FROM attempts a
@@ -58,7 +67,49 @@ const getStudentDetail = async (req, res) => {
       ORDER BY a.started_at ASC
     `, [id]);
 
-    res.json({ student, attempts: attemptsResult.rows, mastery: masteryResult.rows, logs: logsResult.rows, trends: trendResult.rows });
+    // Per-question attempt log with timestamps
+    const questionAttemptsResult = await pool.query(`
+      SELECT qr.id, qr.question_id, qr.selected_option, qr.is_correct, qr.created_at,
+        q.question_text, q.subject, q.topic, q.correct_option,
+        t.title as test_title, t.type as test_type, a.started_at as attempt_started_at
+      FROM question_responses qr
+      JOIN questions q ON q.id = qr.question_id
+      JOIN attempts a ON a.id = qr.attempt_id
+      JOIN tests t ON t.id = a.test_id
+      WHERE a.user_id = ? AND qr.selected_option IS NOT NULL
+      ORDER BY qr.created_at DESC
+      LIMIT 300
+    `, [id]);
+
+    // Referral info
+    const referrerResult = await pool.query(
+      `SELECT u.id, u.name, u.email, u.referral_code, u.created_at
+       FROM users u WHERE u.id = (SELECT referred_by FROM users WHERE id = ?)`,
+      [id]
+    );
+    const referredUsersResult = await pool.query(
+      `SELECT id, name, email, created_at, subscription_status, subscription_plan, subscription_ends_at
+       FROM users WHERE referred_by = ?
+       ORDER BY created_at DESC`,
+      [id]
+    );
+
+    res.json({
+      student,
+      attempts: attemptsResult.rows,
+      mastery: masteryResult.rows,
+      logs: logsResult.rows,
+      trends: trendResult.rows,
+      question_attempts: questionAttemptsResult.rows,
+      referral: {
+        code: student.referral_code || null,
+        referred_by: referrerResult.rows[0] || null,
+        referred_users: referredUsersResult.rows.map((r) => ({
+          ...r,
+          is_paid: r.subscription_plan === 'monthly' && r.subscription_status === 'active'
+        }))
+      }
+    });
   } catch (error) {
     console.error('Get student detail error:', error);
     res.status(500).json({ error: 'Failed to fetch student details' });
