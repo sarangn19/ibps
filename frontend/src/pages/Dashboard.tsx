@@ -292,8 +292,18 @@ const Dashboard: React.FC = () => {
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Expertise Map */}
+          <div className="space-y-4 order-1 lg:order-2">
+            <h2 className="text-xl font-extrabold text-gray-900 flex items-center gap-2">
+              <Brain className="h-5 w-5 text-lingo-purple-dark" />
+              Your Expertise Map
+            </h2>
+            <p className="text-xs text-gray-500">Live mastery tracking — updates as you practice</p>
+            <ExpertiseMap />
+          </div>
+
           {/* Available Tests */}
-          <div className="lg:col-span-2 space-y-4">
+          <div className="lg:col-span-2 space-y-4 order-2 lg:order-1">
             <h2 className="text-xl font-extrabold text-gray-900 flex items-center gap-2">
               <BookOpen className="h-5 w-5 text-lingo-blue-dark" />
               Available Tests
@@ -391,16 +401,6 @@ const Dashboard: React.FC = () => {
                 })}
               </div>
             )}
-          </div>
-
-          {/* Expertise Map sidebar */}
-          <div className="space-y-4">
-            <h2 className="text-xl font-extrabold text-gray-900 flex items-center gap-2">
-              <Brain className="h-5 w-5 text-lingo-purple-dark" />
-              Your Expertise Map
-            </h2>
-            <p className="text-xs text-gray-500">Live mastery tracking — updates as you practice</p>
-            <ExpertiseMap />
           </div>
         </div>
 
