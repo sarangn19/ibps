@@ -196,7 +196,7 @@ const Onboarding: React.FC = () => {
             <button
               onClick={handleFinish}
               disabled={saving}
-              className="lingo-btn lingo-btn-green disabled:opacity-50"
+              className="lingo-btn lingo-btn-green disabled:opacity-50 whitespace-normal leading-tight text-sm"
             >
               {saving ? 'Saving...' : 'Finish & Go to Dashboard'}
             </button>

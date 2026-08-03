@@ -161,16 +161,16 @@ const AdminDashboard: React.FC = () => {
         showBack={false}
         right={
           <div className="flex items-center gap-2 sm:gap-3 text-sm">
-            <Link to="/admin" className="text-blue-600 font-medium">Dashboard</Link>
-            <Link to="/admin/questions" className="text-gray-600 hover:text-gray-900">Question Bank</Link>
+            <Link to="/admin" className="text-blue-600 font-medium shrink-0">Dashboard</Link>
+            <Link to="/admin/questions" className="text-gray-600 hover:text-gray-900 shrink-0">Question Bank</Link>
             <Link to="/admin/tests/generate" className="text-gray-600 hover:text-gray-900 hidden sm:inline">Generate Test</Link>
             <Link to="/admin/cohort" className="text-gray-600 hover:text-gray-900 hidden sm:inline">Cohort</Link>
             {user?.role === 'superadmin' && (
-              <Link to="/admin/superadmin" className="flex items-center gap-1 text-purple-600 font-medium">
-                <Shield className="h-3.5 w-3.5" /> Admin Management
+              <Link to="/admin/superadmin" className="flex items-center gap-1 text-purple-600 font-medium shrink-0">
+                <Shield className="h-3.5 w-3.5" /> Admin
               </Link>
             )}
-            <Link to="/dashboard" className="text-gray-500 hover:text-gray-700 ml-1">Switch to Student View</Link>
+            <Link to="/dashboard" className="text-gray-500 hover:text-gray-700 ml-1 shrink-0 hidden sm:inline">Switch to Student View</Link>
           </div>
         }
       />
@@ -201,14 +201,14 @@ const AdminDashboard: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Student table */}
           <div className="lg:col-span-2 bg-white rounded-lg shadow-sm border">
-            <div className="p-4 border-b flex items-center justify-between">
+            <div className="p-4 border-b flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <h2 className="font-semibold text-gray-900">All Students</h2>
-              <div className="relative">
+              <div className="relative sm:w-auto">
                 <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
                 <input
                   value={search} onChange={e => setSearch(e.target.value)}
                   placeholder="Search students..."
-                  className="pl-9 pr-3 py-2 border rounded-lg text-sm w-48"
+                  className="pl-9 pr-3 py-2 border rounded-lg text-sm w-full sm:w-48"
                 />
               </div>
             </div>

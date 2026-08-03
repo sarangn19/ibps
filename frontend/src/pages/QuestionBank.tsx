@@ -136,10 +136,10 @@ const QuestionBank: React.FC = () => {
         onBack={() => navigate('/admin')}
         right={
           <div className="flex items-center gap-2">
-            <button onClick={() => navigate('/admin/tests/generate')} className="flex items-center gap-2 px-4 py-2 bg-white border text-sm text-gray-700 rounded-lg hover:bg-gray-50">
+            <button onClick={() => navigate('/admin/tests/generate')} className="flex items-center gap-2 px-3 py-2 bg-white border text-sm text-gray-700 rounded-lg hover:bg-gray-50 hidden sm:flex">
               <Plus className="h-4 w-4" /> Generate Test
             </button>
-            <button onClick={openNew} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700">
+            <button onClick={openNew} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 whitespace-nowrap">
               <Plus className="h-4 w-4" /> Add Question
             </button>
           </div>
@@ -262,11 +262,11 @@ const QuestionBank: React.FC = () => {
 
         {/* Pagination */}
         {!loading && questions.length > 0 && (
-          <div className="flex items-center justify-between bg-white rounded-lg shadow-sm border px-4 py-3">
-            <span className="text-sm text-gray-600">
+          <div className="flex items-center justify-between gap-3 bg-white rounded-lg shadow-sm border px-4 py-3">
+            <span className="text-sm text-gray-600 hidden sm:inline">
               Showing {from}–{to} of {total.toLocaleString('en-IN')}
             </span>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 ml-auto sm:ml-0">
               <button
                 onClick={() => setPage(p => Math.max(1, p - 1))}
                 disabled={page <= 1}
@@ -274,7 +274,7 @@ const QuestionBank: React.FC = () => {
               >
                 Prev
               </button>
-              <span className="text-sm text-gray-600">Page {page} of {pages}</span>
+              <span className="text-sm text-gray-600 whitespace-nowrap">Page {page} of {pages}</span>
               <button
                 onClick={() => setPage(p => Math.min(pages, p + 1))}
                 disabled={page >= pages}
@@ -344,7 +344,7 @@ const QuestionBank: React.FC = () => {
                 <p className="text-xs text-gray-500">Select the radio button next to the correct option.</p>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div><label className="block text-xs font-medium text-gray-600 mb-1">Explanation</label>
                   <textarea value={form.explanation} onChange={e => setForm(f => ({ ...f, explanation: e.target.value }))} rows={2} className="w-full border rounded-lg px-3 py-2 text-sm" /></div>
                 <div><label className="block text-xs font-medium text-gray-600 mb-1">Tags (comma separated)</label>
@@ -355,7 +355,7 @@ const QuestionBank: React.FC = () => {
 
               <div className="border-t pt-4">
                 <p className="text-xs font-semibold text-gray-500 uppercase mb-2">Shared Set (optional — for DI tables, reading passages, puzzle clues)</p>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div><label className="block text-xs font-medium text-gray-600 mb-1">Set Title</label>
                     <input value={form.set_title} onChange={e => setForm(f => ({ ...f, set_title: e.target.value }))} placeholder="e.g. DI Table — Set 1" className="w-full border rounded-lg px-3 py-2 text-sm" /></div>
                   <div><label className="block text-xs font-medium text-gray-600 mb-1">Set Type</label>

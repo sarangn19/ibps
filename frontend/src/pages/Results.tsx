@@ -4,6 +4,8 @@ import { Attempt, Test, QuestionResponse } from '../types';
 import api from '../utils/api';
 import MobileNav from '../components/MobileNav';
 import PageHeader from '../components/PageHeader';
+import InsightPanel from '../components/InsightPanel';
+import { generateTestInsights } from '../utils/insightEngine';
 import { CheckCircle, XCircle, TrendingUp, ListChecks } from 'lucide-react';
 
 const Results: React.FC = () => {
@@ -13,6 +15,7 @@ const Results: React.FC = () => {
   const [test, setTest] = useState<Test | null>(null);
   const [responses, setResponses] = useState<QuestionResponse[]>([]);
   const [score, setScore] = useState({ total: 0, correct: 0, attempted: 0, accuracy: 0 });
+  const [previousBest, setPreviousBest] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -36,6 +39,19 @@ const Results: React.FC = () => {
         attempted,
         accuracy: attempted > 0 ? parseFloat(((correct / attempted) * 100).toFixed(2)) : 0
       });
+
+      try {
+        const hRes = await api.get('/attempts/my-history');
+        const entry = hRes.data.find((x: any) => x.test_id === attemptData.test_id);
+        if (entry) {
+          const others = entry.attempts.filter(
+            (a: any) => a.attempt_id !== attemptData.id && a.status === 'completed' && a.total_score != null
+          );
+          setPreviousBest(others.length ? Math.max(...others.map((a: any) => a.total_score)) : null);
+        }
+      } catch (e) {
+        setPreviousBest(null);
+      }
     } catch (error) {
       console.error('Failed to fetch results:', error);
     } finally {
@@ -74,6 +90,8 @@ const Results: React.FC = () => {
       </div>
     );
   }
+
+  const insights = generateTestInsights(responses, score, test, previousBest);
 
   return (
     <div className="min-h-screen bg-lingo-bg">
@@ -127,6 +145,10 @@ const Results: React.FC = () => {
               </div>
             </div>
           </div>
+        </div>
+
+        <div className="mb-8">
+          <InsightPanel title="AI Insights" insights={insights} />
         </div>
 
         <div className="lingo-card overflow-hidden">

@@ -77,11 +77,11 @@ const TopicPractice: React.FC = () => {
 
       <div className="max-w-lg mx-auto px-4 pt-5 pb-nav">
         {/* Breadcrumb */}
-        <div className="flex items-center gap-1 text-sm text-gray-500 font-semibold mb-6">
+        <div className="flex flex-wrap items-center gap-1 text-sm text-gray-500 font-semibold mb-6">
           <span>Subjects</span>
-          {selectedSubject && <><ChevronRight className="h-3 w-3" /><span className="text-gray-900 font-bold">{selectedSubject}</span></>}
-          {selectedTopic && <><ChevronRight className="h-3 w-3" /><span className="text-gray-900 font-bold">{selectedTopic}</span></>}
-          {selectedSubtopic && <><ChevronRight className="h-3 w-3" /><span className="text-gray-900 font-bold">{selectedSubtopic}</span></>}
+          {selectedSubject && <><ChevronRight className="h-3 w-3 shrink-0" /><span className="text-gray-900 font-bold min-w-0 truncate">{selectedSubject}</span></>}
+          {selectedTopic && <><ChevronRight className="h-3 w-3 shrink-0" /><span className="text-gray-900 font-bold min-w-0 truncate">{selectedTopic}</span></>}
+          {selectedSubtopic && <><ChevronRight className="h-3 w-3 shrink-0" /><span className="text-gray-900 font-bold min-w-0 truncate">{selectedSubtopic}</span></>}
         </div>
 
         {/* Step 1: Pick Subject */}
@@ -145,9 +145,9 @@ const TopicPractice: React.FC = () => {
                     } finally { setStarting(false); }
                   }}
                   disabled={starting}
-                  className="w-full lingo-btn lingo-btn-green disabled:opacity-50"
+                  className="w-full lingo-btn lingo-btn-green disabled:opacity-50 whitespace-normal leading-tight"
                 >
-                  {starting ? 'Starting...' : `Quick Practice - ${selectedSubject}`}
+                  {starting ? 'Starting...' : `Quick Practice — ${selectedSubject}`}
                 </button>
               </div>
             </div>

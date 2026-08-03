@@ -6,6 +6,8 @@ import api from '../utils/api';
 import ExpertiseMap from '../components/ExpertiseMap';
 import MobileNav from '../components/MobileNav';
 import PageHeader from '../components/PageHeader';
+import InsightPanel from '../components/InsightPanel';
+import { generateDashboardInsights } from '../utils/insightEngine';
 import { BookOpen, Clock, BarChart3, Award, TrendingUp, Target, Zap, Brain, Calendar } from 'lucide-react';
 
 interface Recommendation {
@@ -125,6 +127,8 @@ const Dashboard: React.FC = () => {
     );
   }
 
+  const insights = generateDashboardInsights(history, recommendations, studyPlan);
+
   return (
     <div className="min-h-screen bg-lingo-bg">
       <PageHeader
@@ -188,6 +192,11 @@ const Dashboard: React.FC = () => {
             </div>
           )
         )}
+
+        {/* AI Insights */}
+        <div>
+          <InsightPanel title="Your Performance Insights" insights={insights} />
+        </div>
 
         {/* Practice Your Weak Areas */}
         <div className="lingo-card p-5">

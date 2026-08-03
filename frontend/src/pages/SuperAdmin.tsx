@@ -131,18 +131,18 @@ const SuperAdmin: React.FC = () => {
           ) : (
             <div className="divide-y">
               {admins.map(a => (
-                <div key={a.id} className="p-4 flex items-center justify-between">
-                  <div>
-                    <p className="font-medium text-gray-900 flex items-center gap-2">
+                <div key={a.id} className="p-4 flex flex-wrap items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="font-medium text-gray-900 flex items-center gap-2 flex-wrap">
                       {a.name}
                       <span className={`px-1.5 py-0.5 text-xs rounded-full font-medium ${
                         a.role === 'superadmin' ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-700'
                       }`}>{a.role}</span>
                     </p>
-                    <p className="text-xs text-gray-500">{a.email}</p>
+                    <p className="text-xs text-gray-500 truncate">{a.email}</p>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs text-gray-400">
+                  <div className="flex items-center gap-3 shrink-0">
+                    <span className="text-xs text-gray-400 hidden sm:inline">
                       Created {new Date(a.created_at).toLocaleDateString()}
                     </span>
                     {a.role !== 'superadmin' && (

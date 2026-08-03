@@ -146,15 +146,15 @@ const StudentDetail: React.FC = () => {
               {attempts.length === 0 ? (
                 <p className="p-4 text-sm text-gray-500">No attempts yet</p>
               ) : attempts.map((a: any) => (
-                <div key={a.id} className="p-4 flex items-center justify-between">
-                  <div>
-                    <p className="font-medium text-gray-900">{a.test_title}</p>
-                    <p className="text-xs text-gray-500">
+                <div key={a.id} className="p-4 flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="font-medium text-gray-900 truncate">{a.test_title}</p>
+                    <p className="text-xs text-gray-500 truncate">
                       {new Date(a.started_at).toLocaleDateString()} · {a.test_type?.replace(/_/g, ' ')}
                       {a.total_score !== null && ` · Score: ${a.total_score}`}
                     </p>
                   </div>
-                  <span className={`px-2 py-0.5 text-xs rounded-full font-medium ${
+                  <span className={`shrink-0 px-2 py-0.5 text-xs rounded-full font-medium ${
                     a.status === 'completed' ? 'bg-green-100 text-green-800' :
                     a.status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
                     'bg-red-100 text-red-800'
@@ -189,7 +189,7 @@ const StudentDetail: React.FC = () => {
                         {q.is_correct === 1 ? 'Correct' : 'Wrong'}
                       </span>
                     </div>
-                    <div className="mt-2 flex items-center gap-4 text-xs text-gray-600">
+                    <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-600">
                       <span>Answered: <span className="font-mono uppercase">{q.selected_option}</span></span>
                       {q.is_correct !== 1 && (
                         <span>Correct: <span className="font-mono uppercase">{q.correct_option}</span></span>
@@ -206,17 +206,17 @@ const StudentDetail: React.FC = () => {
           {trends.length > 1 && (
             <div className="bg-white rounded-lg shadow-sm border p-4">
               <h2 className="font-semibold text-gray-900 mb-3">Score Trend</h2>
-              <div className="flex items-end gap-2 h-32">
+              <div className="flex items-end gap-2 h-32 overflow-x-auto pb-1">
                 {trends.map((t: any, i: number) => {
                   const maxScore = Math.max(...trends.map((x: any) => x.total_score || 0), 1);
                   const height = ((t.total_score || 0) / maxScore) * 100;
                   return (
-                    <div key={i} className="flex-1 flex flex-col items-center gap-1">
-                      <span className="text-xs text-gray-600">{t.total_score?.toFixed(1)}</span>
+                    <div key={i} className="flex-1 min-w-[24px] flex flex-col items-center gap-1">
+                      <span className="text-xs text-gray-600 whitespace-nowrap">{t.total_score?.toFixed(1)}</span>
                       <div className="w-full bg-blue-100 rounded-t" style={{ height: `${Math.max(height, 4)}%` }}>
                         <div className="bg-blue-600 w-full rounded-t" style={{ height: `${height}%` }}></div>
                       </div>
-                      <span className="text-xs text-gray-400">{new Date(t.date).toLocaleDateString().slice(0, 5)}</span>
+                      <span className="text-xs text-gray-400 whitespace-nowrap">{new Date(t.date).toLocaleDateString().slice(0, 5)}</span>
                     </div>
                   );
                 })}

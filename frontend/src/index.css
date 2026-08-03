@@ -98,3 +98,12 @@
 #root {
   overflow-x: hidden;
 }
+
+/* Hide scrollbars for horizontally scrollable rows (nav, chips) */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}

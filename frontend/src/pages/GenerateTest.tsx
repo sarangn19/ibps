@@ -138,10 +138,10 @@ const GenerateTest: React.FC = () => {
                 className="w-24 border rounded-lg px-3 py-2 text-sm" />
             </div>
           </div>
-          <div className="flex gap-2">
-            <button onClick={() => useTemplate(PO_PRELIMS)} className="text-xs px-3 py-1.5 border rounded-lg text-blue-700 hover:bg-blue-50">Prefill IBPS PO Prelims</button>
-            <button onClick={() => useTemplate(PO_MAINS)} className="text-xs px-3 py-1.5 border rounded-lg text-blue-700 hover:bg-blue-50">Prefill IBPS PO Mains</button>
-            <button onClick={() => setSections([emptySection()])} className="text-xs px-3 py-1.5 border rounded-lg text-gray-600 hover:bg-gray-50">Clear</button>
+          <div className="flex flex-wrap gap-2">
+            <button onClick={() => useTemplate(PO_PRELIMS)} className="text-xs px-3 py-2 border rounded-lg text-blue-700 hover:bg-blue-50">Prefill IBPS PO Prelims</button>
+            <button onClick={() => useTemplate(PO_MAINS)} className="text-xs px-3 py-2 border rounded-lg text-blue-700 hover:bg-blue-50">Prefill IBPS PO Mains</button>
+            <button onClick={() => setSections([emptySection()])} className="text-xs px-3 py-2 border rounded-lg text-gray-600 hover:bg-gray-50">Clear</button>
           </div>
         </div>
 
@@ -190,7 +190,7 @@ const GenerateTest: React.FC = () => {
                     className="w-20 border rounded-lg px-3 py-2 text-sm bg-white" />
                 </div>
                 <button onClick={() => setSections(rows => rows.filter((_, idx) => idx !== i))}
-                  className="text-gray-400 hover:text-red-600 p-1"><X className="h-4 w-4" /></button>
+                  className="text-gray-400 hover:text-red-600 p-2 touch-target"><X className="h-4 w-4" /></button>
               </div>
             );
           })}

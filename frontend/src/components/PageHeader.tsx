@@ -41,7 +41,9 @@ const PageHeader: React.FC<PageHeaderProps> = ({ title, onBack, backLabel, right
             {backLabel && <span className="text-xs text-gray-400 hidden sm:inline">{backLabel}</span>}
           </div>
         </div>
-        {right && <div className="flex items-center gap-2 shrink-0">{right}</div>}
+        {right && (
+          <div className="flex items-center gap-2 min-w-0 overflow-x-auto whitespace-nowrap no-scrollbar shrink-0">{right}</div>
+        )}
       </div>
     </nav>
   );

@@ -182,11 +182,11 @@ const ExpertiseMap: React.FC = () => {
                     onClick={() => toggle(`${subject.subject}|${topic.topic}`)}
                     className="w-full flex items-center justify-between p-2 hover:bg-gray-50"
                   >
-                    <div className="flex items-center gap-2">
-                      {expanded[`${subject.subject}|${topic.topic}`] ? <ChevronDown className="h-3 w-3 text-gray-400" /> : <ChevronRight className="h-3 w-3 text-gray-400" />}
-                      <span className="text-sm text-gray-700">{topic.topic}</span>
+                    <div className="flex items-center gap-2 min-w-0">
+                      {expanded[`${subject.subject}|${topic.topic}`] ? <ChevronDown className="h-3 w-3 text-gray-400 shrink-0" /> : <ChevronRight className="h-3 w-3 text-gray-400 shrink-0" />}
+                      <span className="text-sm text-gray-700 truncate">{topic.topic}</span>
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 shrink-0">
                       <span className="text-xs text-gray-500">{topic.subtopics.length} subtopics</span>
                       <span className={`text-xs px-1.5 py-0.5 rounded-full border ${classificationColor(overallClassification(topic.subtopics))}`}>
                         {overallClassification(topic.subtopics)}
@@ -206,16 +206,16 @@ const ExpertiseMap: React.FC = () => {
                                 <span className={classificationColor(st.classification).split(' ')[0] === 'bg-green-100' ? 'text-green-600' : classificationColor(st.classification).split(' ')[0] === 'bg-yellow-100' ? 'text-yellow-600' : classificationColor(st.classification).split(' ')[0] === 'bg-red-100' ? 'text-red-600' : 'text-gray-400'}>
                                   {classificationIcon(st.classification)}
                                 </span>
-                                <span className="text-gray-700 truncate max-w-[120px]">{st.subtopic}</span>
+                                <span className="text-gray-700 truncate max-w-[110px]">{st.subtopic}</span>
                               </div>
-                              <div className="flex-1">{masteryBar(st.mastery_score)}</div>
-                              <div className="flex items-center gap-3 text-xs text-gray-500 min-w-[100px] justify-end">
+                              <div className="flex-1 min-w-[50px]">{masteryBar(st.mastery_score)}</div>
+                              <div className="flex items-center gap-2 text-xs text-gray-500 min-w-[96px] justify-end">
                                 <span>{st.mastery_score.toFixed(0)}%</span>
                                 <span>{st.attempt_count}q</span>
                                 {st.classification !== 'not_attempted' && (
                                   <button
                                     onClick={() => navigate(`/practice/start?subject=${encodeURIComponent(subject.subject)}&topic=${encodeURIComponent(topic.topic)}&subtopic=${encodeURIComponent(st.subtopic)}`)}
-                                    className="text-blue-600 hover:text-blue-700 font-medium"
+                                    className="text-blue-600 hover:text-blue-700 font-medium px-2 py-1 touch-target flex items-center"
                                   >
                                     Practice
                                   </button>

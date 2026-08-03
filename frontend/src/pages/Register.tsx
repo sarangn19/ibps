@@ -30,7 +30,7 @@ const Register: React.FC = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-lingo-bg">
-      <div className="max-w-md w-full bg-white rounded-2xl border-2 border-lingo-border p-8 shadow-lingo-sm">
+      <div className="max-w-md w-full bg-white rounded-2xl border-2 border-lingo-border p-6 sm:p-8 shadow-lingo-sm mx-4">
         <h1 className="text-3xl font-extrabold text-center text-lingo-green mb-2">IBPS Coaching</h1>
         <h2 className="text-lg text-center mb-6 text-gray-600 font-bold">Student Registration</h2>
 
