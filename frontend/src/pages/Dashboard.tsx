@@ -324,9 +324,9 @@ const Dashboard: React.FC = () => {
                     <div key={test.id} className="lingo-card hover:-translate-y-0.5 transition-transform">
                       <div className="p-5">
                         <div className="flex items-start justify-between mb-3">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                              <h3 className="font-extrabold text-gray-900">{test.title}</h3>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-extrabold text-gray-900 leading-snug">{test.title}</h3>
+                            <div className="flex flex-wrap items-center gap-2 mt-1.5">
                               <span className={`px-2 py-0.5 text-xs font-bold rounded-xl uppercase ${typeColor(test.type)}`}>
                                 {typeLabel(test.type)}
                               </span>
@@ -354,7 +354,7 @@ const Dashboard: React.FC = () => {
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-4 text-xs text-gray-500 mb-3">
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-500 mb-3">
                           <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" />{test.duration_minutes}min</span>
                           <span className="flex items-center gap-1"><BarChart3 className="h-3.5 w-3.5" />{Array.isArray(test.question_ids) ? test.question_ids.length : 0} Qs</span>
                           {test.negative_marking_ratio > 0 && (
@@ -362,18 +362,18 @@ const Dashboard: React.FC = () => {
                           )}
                         </div>
 
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
                           {pendingAttempt ? (
                             <>
                               <button
                                 onClick={() => navigate(`/test/${test.id}`)}
-                                className="px-4 py-2 bg-lingo-green text-white text-sm rounded-xl font-bold border-b-4 border-lingo-green-dark hover:bg-lingo-green-dark active:scale-[0.97]"
+                                className="px-4 py-2 bg-lingo-green text-white text-sm rounded-xl font-bold border-b-4 border-lingo-green-dark hover:bg-lingo-green-dark active:scale-[0.97] whitespace-nowrap"
                               >
                                 Resume Test
                               </button>
                               <button
                                 onClick={() => navigate(`/results/${pendingAttempt.attempt_id!}`)}
-                                className="px-4 py-2 bg-lingo-bg text-gray-700 text-sm rounded-xl font-bold border-b-4 border-lingo-border hover:bg-lingo-border/60 active:scale-[0.97]"
+                                className="px-4 py-2 bg-lingo-bg text-gray-700 text-sm rounded-xl font-bold border-b-4 border-lingo-border hover:bg-lingo-border/60 active:scale-[0.97] whitespace-nowrap"
                               >
                                 View Progress
                               </button>
@@ -381,7 +381,7 @@ const Dashboard: React.FC = () => {
                           ) : (
                             <button
                               onClick={() => handleStartTest(test.id)}
-                              className="px-4 py-2 bg-lingo-blue text-white text-sm rounded-xl font-bold border-b-4 border-lingo-blue-dark hover:bg-lingo-blue-dark active:scale-[0.97]"
+                              className="px-4 py-2 bg-lingo-blue text-white text-sm rounded-xl font-bold border-b-4 border-lingo-blue-dark hover:bg-lingo-blue-dark active:scale-[0.97] whitespace-nowrap"
                             >
                               {lastAttempt ? 'Retake' : 'Start Test'}
                             </button>
@@ -389,7 +389,7 @@ const Dashboard: React.FC = () => {
                           {h?.attempts?.filter(a => a.status === 'completed').length > 0 && (
                             <button
                               onClick={() => { const completed = h.attempts.filter(x => x.status === 'completed'); if (completed.length > 0) handleViewResults(completed[0].attempt_id!); }}
-                              className="px-4 py-2 bg-lingo-bg text-gray-700 text-sm rounded-xl font-bold border-b-4 border-lingo-border hover:bg-lingo-border/60 active:scale-[0.97]"
+                              className="px-4 py-2 bg-lingo-bg text-gray-700 text-sm rounded-xl font-bold border-b-4 border-lingo-border hover:bg-lingo-border/60 active:scale-[0.97] whitespace-nowrap"
                             >
                               View Last Results
                             </button>
