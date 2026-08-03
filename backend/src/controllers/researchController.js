@@ -357,4 +357,25 @@ const getResearchDashboard = async (req, res) => {
   }
 };
 
-module.exports = { getResearchDashboard };
+const getStudents = async (req, res) => {
+  try {
+    const students = await rs.getStudents();
+    res.json({ students });
+  } catch (error) {
+    console.error('Student list error:', error);
+    res.status(500).json({ error: 'Failed to fetch students' });
+  }
+};
+
+const getStudentDetail = async (req, res) => {
+  try {
+    const detail = await rs.getStudentDetail(req.params.id);
+    if (!detail) return res.status(404).json({ error: 'Student not found' });
+    res.json(detail);
+  } catch (error) {
+    console.error('Student detail error:', error);
+    res.status(500).json({ error: 'Failed to fetch student detail' });
+  }
+};
+
+module.exports = { getResearchDashboard, getStudents, getStudentDetail };

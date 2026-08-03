@@ -18,6 +18,7 @@ import GenerateTest from './pages/GenerateTest';
 import SuperAdmin from './pages/SuperAdmin';
 import Paywall from './pages/Paywall';
 import UxResearch from './pages/UxResearch';
+import Student360 from './pages/Student360';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, loading } = useAuth();
@@ -246,6 +247,22 @@ const App: React.FC = () => {
             element={
               <AdminRoute>
                 <UxResearch />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/research/students"
+            element={
+              <AdminRoute>
+                <Student360 />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/research/students/:id"
+            element={
+              <AdminRoute>
+                <Student360 />
               </AdminRoute>
             }
           />

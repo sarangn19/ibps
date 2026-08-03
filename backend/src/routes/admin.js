@@ -2,7 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const router = express.Router();
 const { getStudents, getStudentDetail, getCohort, getFlags, getBatches } = require('../controllers/adminController');
-const { getResearchDashboard } = require('../controllers/researchController');
+const { getResearchDashboard, getStudents: getResearchStudents, getStudentDetail: getResearchStudentDetail } = require('../controllers/researchController');
 const { uploadQuestions, downloadTemplate } = require('../controllers/questionUploadController');
 const { getQuestions, getAdminQuestions, getQuestionStats, getQuestionById, updateQuestion, deleteQuestion, getSubjects } = require('../controllers/questionController');
 const { generateTest } = require('../controllers/adminTestController');
@@ -39,5 +39,7 @@ router.get('/questions/:id', auth, adminOnly, getQuestionById);
 router.put('/questions/:id', auth, adminOnly, updateQuestion);
 router.delete('/questions/:id', auth, adminOnly, deleteQuestion);
 router.get('/research/dashboard', auth, adminOnly, getResearchDashboard);
+router.get('/research/students', auth, adminOnly, getResearchStudents);
+router.get('/research/students/:id', auth, adminOnly, getResearchStudentDetail);
 
 module.exports = router;

@@ -319,6 +319,12 @@ const UxResearch: React.FC = () => {
               {m.label}
             </button>
           ))}
+          <button
+            onClick={() => navigate('/admin/research/students')}
+            className="shrink-0 px-3 py-2 rounded-lg text-sm font-semibold bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
+          >
+            Every Student →
+          </button>
         </div>
 
         {loading ? (
