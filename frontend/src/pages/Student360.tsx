@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import api from '../utils/api';
 import PageHeader from '../components/PageHeader';
-import { Users, User, ArrowLeft, Calendar, Target, Trophy, Activity, Flame, CheckCircle2, AlertTriangle, XCircle } from 'lucide-react';
+import { Users, User, ArrowLeft, Calendar, Target, Trophy, Activity, Flame, CheckCircle2, AlertTriangle, XCircle, Download } from 'lucide-react';
 
 const Card: React.FC<{ title?: string; children: React.ReactNode; className?: string }> = ({ title, children, className }) => (
   <div className={`bg-white rounded-lg shadow-sm border p-4 ${className || ''}`}>
@@ -53,6 +53,26 @@ const parseDetail = (type: string, detail: string) => {
   } catch {
     return detail;
   }
+};
+
+const csvCell = (v: any) => {
+  if (v === null || v === undefined) return '';
+  const s = String(v);
+  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+};
+
+const downloadCsv = (rows: any[], filename: string) => {
+  if (rows.length === 0) return;
+  const header = Object.keys(rows[0]);
+  const lines = [header.map(csvCell).join(',')];
+  for (const r of rows) lines.push(header.map(h => csvCell(r[h])).join(','));
+  const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
 };
 
 const StudentList: React.FC = () => {
@@ -118,6 +138,13 @@ const StudentList: React.FC = () => {
             placeholder="Search name or email..."
             className="flex-1 px-3 py-1.5 border rounded-lg text-sm min-w-0"
           />
+          <button
+            onClick={() => downloadCsv(filtered, 'students.csv')}
+            disabled={filtered.length === 0}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold bg-gray-800 text-white hover:bg-gray-700 disabled:opacity-40 shrink-0"
+          >
+            <Download className="h-4 w-4" /> CSV
+          </button>
         </div>
 
         {loading ? (
