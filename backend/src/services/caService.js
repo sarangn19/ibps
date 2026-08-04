@@ -31,7 +31,18 @@ const SCHEMA = [
   )`,
   'CREATE INDEX IF NOT EXISTS idx_current_affairs_pub_date ON current_affairs(pub_date)',
   'CREATE INDEX IF NOT EXISTS idx_current_affairs_category ON current_affairs(category)',
-  'CREATE INDEX IF NOT EXISTS idx_ca_quiz_category ON ca_quiz_questions(category)'
+  'CREATE INDEX IF NOT EXISTS idx_ca_quiz_category ON ca_quiz_questions(category)',
+  `CREATE TABLE IF NOT EXISTS ca_fetch_log (
+     id BIGSERIAL PRIMARY KEY,
+     day TEXT NOT NULL,
+     total_inserted INTEGER NOT NULL DEFAULT 0,
+     reclassified INTEGER NOT NULL DEFAULT 0,
+     status TEXT NOT NULL CHECK (status IN ('ok', 'partial', 'error')),
+     per_cat TEXT,
+     failed_categories TEXT,
+     created_at TEXT DEFAULT (to_char(now(), 'YYYY-MM-DD HH24:MI:SS'))
+   )`,
+  'CREATE UNIQUE INDEX IF NOT EXISTS idx_ca_fetch_log_day ON ca_fetch_log(day)'
 ];
 
 const API_KEY = process.env.NEWSDATA_API_KEY || 'pub_1dbb22f6d99a41cd92ba9d0ab542031c';
@@ -170,27 +181,73 @@ async function reclassifyUncategorized() {
   return updated;
 }
 
+async function logFetchRun({ totalInserted, reclassified, perCat, failedCategories, fatalError }) {
+  await ensureSchema();
+  const day = new Date().toISOString().slice(0, 10);
+  let status = 'ok';
+  if (fatalError || (failedCategories && failedCategories.length > 0)) {
+    status = totalInserted === 0 ? 'error' : 'partial';
+  }
+  await pool.query(
+    `INSERT INTO ca_fetch_log (day, total_inserted, reclassified, status, per_cat, failed_categories)
+     VALUES (?, ?, ?, ?, ?, ?)
+     ON CONFLICT (day) DO UPDATE SET
+       total_inserted = EXCLUDED.total_inserted,
+       reclassified = EXCLUDED.reclassified,
+       status = EXCLUDED.status,
+       per_cat = EXCLUDED.per_cat,
+       failed_categories = EXCLUDED.failed_categories`,
+    [day, totalInserted, reclassified, status, JSON.stringify(perCat), JSON.stringify(failedCategories || [])]
+  );
+
+  if (process.env.ALERT_WEBHOOK && (fatalError || (failedCategories && failedCategories.length > 0))) {
+    try {
+      await fetch(process.env.ALERT_WEBHOOK, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          text: `⚠️ Current Affairs fetch ${status === 'error' ? 'failed' : 'partially failed'} (${day}). inserted=${totalInserted}, failed=${JSON.stringify(failedCategories)}`,
+          ...(fatalError ? { error: fatalError } : {})
+        })
+      }).catch(() => {});
+    } catch (e) {
+      console.error('Alert webhook send failed:', e);
+    }
+  }
+  return status;
+}
+
 async function fetchAndStore() {
   await ensureSchema();
   const client = await pool.connect();
   let totalInserted = 0;
   const perCat = {};
+  const failedCategories = [];
+  let fatalError = null;
   try {
     await client.query('BEGIN');
     for (const cat of CATEGORIES) {
-      const items = await fetchCategory(cat);
-      perCat[cat] = items.length;
-      totalInserted += await insertItems(client, items, cat);
+      try {
+        const items = await fetchCategory(cat);
+        perCat[cat] = items.length;
+        totalInserted += await insertItems(client, items, cat);
+      } catch (catErr) {
+        failedCategories.push({ category: cat, error: catErr.message });
+        console.error(`CA fetch category ${cat} failed:`, catErr.message);
+      }
     }
     await client.query('COMMIT');
   } catch (e) {
+    fatalError = e.message;
     await client.query('ROLLBACK');
     throw e;
   } finally {
     client.release();
   }
+
   const reclassified = await reclassifyUncategorized();
-  return { totalInserted, reclassified, perCat };
+  const status = await logFetchRun({ totalInserted, reclassified, perCat, failedCategories, fatalError });
+  return { totalInserted, reclassified, perCat, failed: failedCategories, status };
 }
 
 async function getFeed({ category, month, limit = 30, offset = 0 }) {
@@ -241,10 +298,12 @@ async function getStats() {
   const items = await pool.query('SELECT count(*) AS count FROM current_affairs');
   const quiz = await pool.query('SELECT count(*) AS count FROM ca_quiz_questions');
   const byCat = await pool.query('SELECT category, count(*) AS count FROM current_affairs GROUP BY category ORDER BY count DESC');
+  const last = await pool.query('SELECT day, status, total_inserted, failed_categories FROM ca_fetch_log ORDER BY id DESC LIMIT 1');
   return {
     articles: parseInt(items.rows[0].count, 10),
     quiz_questions: parseInt(quiz.rows[0].count, 10),
-    by_category: byCat.rows
+    by_category: byCat.rows,
+    last_fetch: last.rows[0] || null
   };
 }
 
