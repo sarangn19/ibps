@@ -189,15 +189,16 @@ async function logFetchRun({ totalInserted, reclassified, perCat, failedCategori
     status = totalInserted === 0 ? 'error' : 'partial';
   }
   await pool.query(
-    `INSERT INTO ca_fetch_log (day, total_inserted, reclassified, status, per_cat, failed_categories)
-     VALUES (?, ?, ?, ?, ?, ?)
+    `INSERT INTO ca_fetch_log (day, total_inserted, reclassified, status, per_cat, failed_categories, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?)
      ON CONFLICT (day) DO UPDATE SET
        total_inserted = EXCLUDED.total_inserted,
        reclassified = EXCLUDED.reclassified,
        status = EXCLUDED.status,
        per_cat = EXCLUDED.per_cat,
-       failed_categories = EXCLUDED.failed_categories`,
-    [day, totalInserted, reclassified, status, JSON.stringify(perCat), JSON.stringify(failedCategories || [])]
+       failed_categories = EXCLUDED.failed_categories,
+       created_at = EXCLUDED.created_at`,
+    [day, totalInserted, reclassified, status, JSON.stringify(perCat), JSON.stringify(failedCategories || []), new Date().toISOString().replace('T', ' ').slice(0, 19)]
   );
 
   if (process.env.ALERT_WEBHOOK && (fatalError || (failedCategories && failedCategories.length > 0))) {
