@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Test, Question, Attempt } from '../types';
+import { Test, Question, Attempt, PreTestRefresher } from '../types';
 import api from '../utils/api';
 import PageHeader from '../components/PageHeader';
-import { Clock, ChevronLeft, ChevronRight, Flag, Grid3X3 } from 'lucide-react';
+import { Clock, ChevronLeft, ChevronRight, Flag, Grid3X3, AlertTriangle, BookOpenCheck } from 'lucide-react';
 
 const TestTaking: React.FC = () => {
   const { testId } = useParams<{ testId: string }>();
@@ -18,12 +18,27 @@ const TestTaking: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [responses, setResponses] = useState<Record<number, { selected: string; marked: boolean }>>({});
   const [showNavigator, setShowNavigator] = useState(false);
+  const [refresher, setRefresher] = useState<PreTestRefresher | null>(null);
   const questionStartTimeRef = useRef<number>(Date.now());
   const timedRef = useRef(false);
   const submittedRef = useRef(false);
 
   useEffect(() => {
-    startTest();
+    const init = async () => {
+      try {
+        const res = await api.get(`/revision/pre-test/${testId}`);
+        const data = res.data;
+        if (data.in_progress || data.refresher.length === 0) {
+          startTest();
+        } else {
+          setRefresher(data);
+          setLoading(false);
+        }
+      } catch (e) {
+        startTest();
+      }
+    };
+    init();
   }, [testId]);
 
   useEffect(() => {
@@ -149,6 +164,64 @@ const TestTaking: React.FC = () => {
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-lingo-border border-t-lingo-green"></div>
           <p className="mt-4 text-gray-600 font-bold">Loading test...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (refresher && !attempt) {
+    const startAnyway = () => {
+      setRefresher(null);
+      startTest();
+    };
+    return (
+      <div className="min-h-screen bg-lingo-bg">
+        <PageHeader title="Refresh Concepts First" onBack={() => navigate('/dashboard')} />
+        <div className="max-w-lg mx-auto px-4 pt-5 pb-16">
+          <div className="lingo-card p-5 mb-4">
+            <div className="flex items-center gap-3 mb-3">
+              <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-lingo-red/15 text-lingo-red shrink-0">
+                <AlertTriangle className="h-6 w-6" />
+              </span>
+              <div>
+                <h2 className="font-extrabold text-gray-900 leading-tight">Your accuracy is below 60% on these topics</h2>
+                <p className="text-xs text-gray-500 font-semibold mt-0.5">A quick refresher now will boost your score in this test.</p>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              {refresher.refresher.map(t => (
+                <div key={`${t.subject}|${t.topic}|${t.subtopic || ''}`} className="flex flex-wrap items-center justify-between gap-2 border-2 border-lingo-border rounded-xl px-3 py-2">
+                  <div className="min-w-0">
+                    <p className="text-sm font-bold text-gray-900 truncate">{t.topic}{t.subtopic ? ` · ${t.subtopic}` : ''}</p>
+                    <p className="text-xs text-gray-500">
+                      {t.accuracy_rolling !== null ? `${Math.round(t.accuracy_rolling)}% accuracy` : t.classification} · {t.available} questions available
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      const p = new URLSearchParams({ subject: t.subject, topic: t.topic });
+                      if (t.subtopic) p.set('subtopic', t.subtopic);
+                      navigate(`/practice/start?${p.toString()}`);
+                    }}
+                    className="shrink-0 px-3 py-1.5 bg-lingo-blue text-white text-xs rounded-xl font-bold hover:bg-lingo-blue-dark whitespace-nowrap"
+                  >
+                    Practice First
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            <button
+              onClick={startAnyway}
+              className="w-full mt-4 px-4 py-2 bg-lingo-blue text-white text-sm rounded-xl font-bold border-b-4 border-lingo-blue-dark hover:bg-lingo-blue-dark active:scale-[0.97]"
+            >
+              Start Test Anyway
+            </button>
+            <p className="text-xs text-gray-500 text-center mt-3 flex items-center justify-center gap-1">
+              <BookOpenCheck className="h-3.5 w-3.5" /> You can also skip straight to the test if you prefer.
+            </p>
+          </div>
         </div>
       </div>
     );

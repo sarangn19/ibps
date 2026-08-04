@@ -1,4 +1,50 @@
 const pool = require('../database/db');
+const { parseQuestionIds } = require('../utils/questionIds');
+
+const EASY_GA_TITLE = 'General Awareness — Easy Mode';
+
+function withParsedIds(test) {
+  return { ...test, question_ids: parseQuestionIds(test.question_ids) };
+}
+
+// Lazy-create (or return) the beginner-friendly GA practice set: easy questions
+// across every GA topic, no negative marking, so students can build confidence
+// before attempting full mocks.
+const getEasyGA = async (req, res) => {
+  try {
+    const existing = await pool.query(
+      'SELECT * FROM tests WHERE title = ? ORDER BY id LIMIT 1',
+      [EASY_GA_TITLE]
+    );
+    if (existing.rows.length > 0) {
+      return res.json(withParsedIds(existing.rows[0]));
+    }
+
+    const idsResult = await pool.query(
+      `SELECT id FROM questions
+       WHERE subject = ? AND difficulty = 'easy'
+       ORDER BY RANDOM() LIMIT 15`,
+      ['General Awareness']
+    );
+    const ids = idsResult.rows.map(r => r.id);
+
+    if (ids.length === 0) {
+      return res.status(404).json({ error: 'No easy General Awareness questions available yet' });
+    }
+
+    const insert = await pool.query(
+      `INSERT INTO tests (title, type, exam_stage, duration_minutes, negative_marking_ratio, question_ids)
+       VALUES (?, 'topic_practice', 'prelims', 15, 0, ?)
+       RETURNING *`,
+      [EASY_GA_TITLE, JSON.stringify(ids)]
+    );
+
+    res.status(201).json(withParsedIds(insert.rows[0]));
+  } catch (error) {
+    console.error('Get easy GA error:', error);
+    res.status(500).json({ error: 'Failed to prepare easy GA practice' });
+  }
+};
 
 const startPractice = async (req, res) => {
   try {
@@ -41,4 +87,4 @@ const startPractice = async (req, res) => {
   }
 };
 
-module.exports = { startPractice };
+module.exports = { startPractice, getEasyGA };

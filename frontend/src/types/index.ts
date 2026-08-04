@@ -193,3 +193,25 @@ export interface CaStats {
   quiz_questions: number;
   by_category: { category: string; count: number }[];
 }
+
+export interface RevisionDueTopic {
+  subject: string;
+  topic: string;
+  subtopic: string | null;
+  classification: string;
+  accuracy_rolling: number | null;
+  available: number;
+  days_since_last_attempt: number | null;
+  scope: { subject: string; topic: string; subtopic: string | null };
+}
+
+export interface DailyRevision {
+  streak: number;
+  today_checked: boolean;
+  due_topics: RevisionDueTopic[];
+}
+
+export interface PreTestRefresher {
+  in_progress: boolean;
+  refresher: RevisionDueTopic[];
+}

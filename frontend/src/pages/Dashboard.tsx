@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { Test, TestHistory, SubjectTree, StudyPlan } from '../types';
+import { Test, TestHistory, SubjectTree, StudyPlan, DailyRevision } from '../types';
 import api from '../utils/api';
 import ExpertiseMap from '../components/ExpertiseMap';
 import MobileNav from '../components/MobileNav';
 import PageHeader from '../components/PageHeader';
 import InsightPanel from '../components/InsightPanel';
 import { generateDashboardInsights } from '../utils/insightEngine';
-import { BookOpen, Clock, BarChart3, Award, TrendingUp, Target, Zap, Brain, Calendar } from 'lucide-react';
+import { BookOpen, Clock, BarChart3, Award, TrendingUp, Target, Zap, Brain, Calendar, Flame, RefreshCw, Sparkles } from 'lucide-react';
 
 interface Recommendation {
   subject: string;
@@ -29,11 +29,41 @@ const Dashboard: React.FC = () => {
   const [subjects, setSubjects] = useState<SubjectTree[]>([]);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [studyPlan, setStudyPlan] = useState<StudyPlan | null>(null);
+  const [revision, setRevision] = useState<DailyRevision | null>(null);
+  const [easyGA, setEasyGA] = useState<Test | null>(null);
+  const [checkingIn, setCheckingIn] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([fetchTests(), fetchHistory(), fetchSubjects(), fetchRecommendations(), fetchStudyPlan()]).finally(() => setLoading(false));
+    Promise.all([fetchTests(), fetchHistory(), fetchSubjects(), fetchRecommendations(), fetchStudyPlan(), fetchRevision(), fetchEasyGA()]).finally(() => setLoading(false));
   }, []);
+
+  const fetchRevision = async () => {
+    try {
+      const res = await api.get('/revision/daily');
+      setRevision(res.data);
+    } catch (e) { /* students without access won't have revision yet */ }
+  };
+
+  const fetchEasyGA = async () => {
+    try {
+      const res = await api.get('/practice/easy-ga');
+      setEasyGA(res.data);
+    } catch (e) { /* skip if not available */ }
+  };
+
+  const handleCheckIn = async () => {
+    setCheckingIn(true);
+    try {
+      await api.post('/revision/checkin');
+      const res = await api.get('/revision/daily');
+      setRevision(res.data);
+    } catch (e) {
+      console.error('Revision check-in failed:', e);
+    } finally {
+      setCheckingIn(false);
+    }
+  };
 
   const fetchStudyPlan = async () => {
     try {
@@ -259,6 +289,94 @@ const Dashboard: React.FC = () => {
             </div>
           )}
         </div>
+
+        {/* Daily Revision & Streak */}
+        {revision && (
+          <div>
+            <h2 className="text-xl font-extrabold text-gray-900 flex items-center gap-2 mb-3">
+              <Flame className="h-5 w-5 text-lingo-blue-dark" />
+              Daily Revision
+            </h2>
+            <div className="lingo-card p-5">
+              <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+                <div className="flex items-center gap-3">
+                  <span className={`flex h-11 w-11 items-center justify-center rounded-2xl ${revision.today_checked ? 'bg-lingo-green/15 text-lingo-green-dark' : 'bg-lingo-blue/15 text-lingo-blue-dark'}`}>
+                    <Flame className="h-6 w-6" />
+                  </span>
+                  <div>
+                    <p className="text-2xl font-extrabold text-gray-900 leading-none">{revision.streak} day{revision.streak === 1 ? '' : 's'}</p>
+                    <p className="text-xs text-gray-500 font-semibold mt-1">
+                      {revision.today_checked ? 'Revised today — streak safe' : revision.streak > 0 ? 'Revise today to keep your streak' : 'Revise today to start your streak'}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={handleCheckIn}
+                  disabled={checkingIn || revision.today_checked}
+                  className={`shrink-0 px-4 py-2 text-sm rounded-xl font-bold border-b-4 active:scale-[0.97] whitespace-nowrap ${
+                    revision.today_checked
+                      ? 'bg-lingo-border text-gray-500 border-lingo-border/60 cursor-default'
+                      : 'bg-lingo-green text-white border-lingo-green-dark hover:bg-lingo-green-dark'
+                  }`}
+                >
+                  {checkingIn ? 'Saving...' : revision.today_checked ? 'Revised ✓' : 'I revised today'}
+                </button>
+              </div>
+
+              {revision.due_topics.length === 0 ? (
+                <p className="text-sm text-gray-500">Nothing due right now — your weak areas are under control.</p>
+              ) : (
+                <div className="space-y-2">
+                  <p className="text-sm text-gray-600 font-semibold">
+                    <RefreshCw className="h-3.5 w-3.5 inline mr-1 text-lingo-blue-dark" />
+                    {revision.due_topics.length} topic{revision.due_topics.length === 1 ? '' : 's'} due for a quick refresh:
+                  </p>
+                  {revision.due_topics.map(t => (
+                    <div key={`${t.scope.subject}|${t.scope.topic}|${t.scope.subtopic || ''}`} className="flex flex-wrap items-center justify-between gap-2 border-2 border-lingo-border rounded-xl px-3 py-2">
+                      <div className="min-w-0">
+                        <p className="text-sm font-bold text-gray-900 truncate">{t.topic}{t.scope.subtopic ? ` · ${t.scope.subtopic}` : ''}</p>
+                        <p className="text-xs text-gray-500">
+                          {t.accuracy_rolling !== null ? `${Math.round(t.accuracy_rolling)}% accuracy` : t.classification} · {t.available} questions
+                          {t.days_since_last_attempt !== null ? ` · ${t.days_since_last_attempt}d ago` : ''}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => {
+                          const p = new URLSearchParams({ subject: t.scope.subject, topic: t.scope.topic });
+                          if (t.scope.subtopic) p.set('subtopic', t.scope.subtopic);
+                          navigate(`/practice/start?${p.toString()}`);
+                        }}
+                        className="shrink-0 px-3 py-1.5 bg-lingo-blue text-white text-xs rounded-xl font-bold hover:bg-lingo-blue-dark whitespace-nowrap"
+                      >
+                        Revise
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Easy-mode GA practice */}
+        {easyGA && user?.role === 'student' && (
+          <div>
+            <h2 className="text-xl font-extrabold text-gray-900 flex items-center gap-2 mb-3">
+              <Sparkles className="h-5 w-5 text-lingo-blue-dark" />
+              Build Confidence with Easy Practice
+            </h2>
+            <div className="lingo-card p-5">
+              <p className="text-sm text-gray-600 mb-1 font-semibold">General Awareness — Easy Mode</p>
+              <p className="text-xs text-gray-500 mb-4">Beginner-friendly set with no negative marking. Warm up before attempting full mocks.</p>
+              <button
+                onClick={() => navigate(`/test/${easyGA.id}`)}
+                className="w-full px-4 py-2 bg-lingo-blue text-white text-sm rounded-xl font-bold border-b-4 border-lingo-blue-dark hover:bg-lingo-blue-dark active:scale-[0.97]"
+              >
+                Start Easy Practice ({Array.isArray(easyGA.question_ids) ? easyGA.question_ids.length : 15} questions · 15 min)
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Your Study Plan */}
         {studyPlan && (
