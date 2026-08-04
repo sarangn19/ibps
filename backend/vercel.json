@@ -11,5 +11,15 @@
       "src": "/(.*)",
       "dest": "api/index.js"
     }
+  ],
+  "crons": [
+    {
+      "path": "/api/ca/fetch-daily",
+      "schedule": "0 4 * * *"
+    },
+    {
+      "path": "/api/ca/fetch-daily",
+      "schedule": "0 16 * * *"
+    }
   ]
 }
