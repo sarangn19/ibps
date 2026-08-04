@@ -138,10 +138,10 @@ const Results: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-gray-600 font-bold">Accuracy</p>
-                <p className="text-2xl font-extrabold text-lingo-purple-dark">{score.accuracy}%</p>
+                <p className="text-2xl font-extrabold text-lingo-blue-dark">{score.accuracy}%</p>
               </div>
-              <div className="h-7 w-7 bg-lingo-purple/15 rounded-full flex items-center justify-center">
-                <span className="text-lingo-purple-dark font-extrabold">%</span>
+              <div className="h-7 w-7 bg-lingo-blue/15 rounded-full flex items-center justify-center">
+                <span className="text-lingo-blue-dark font-extrabold">%</span>
               </div>
             </div>
           </div>
@@ -177,7 +177,7 @@ const Results: React.FC = () => {
                     )}
                     <span className={`px-2 py-1 text-xs font-bold rounded-xl uppercase ${
                       response.difficulty === 'easy' ? 'bg-lingo-green/15 text-lingo-green-dark' :
-                      response.difficulty === 'medium' ? 'bg-lingo-yellow/20 text-lingo-yellow-dark' :
+                      response.difficulty === 'medium' ? 'bg-lingo-blue/15 text-lingo-blue-dark' :
                       'bg-lingo-red/15 text-lingo-red'
                     }`}>
                       {response.difficulty}
@@ -186,8 +186,8 @@ const Results: React.FC = () => {
                 </div>
 
                 {response.set_stimulus && (
-                  <div className="mb-4 p-4 bg-lingo-purple/15 border-2 border-lingo-purple rounded-xl">
-                    <p className="text-[11px] font-bold text-lingo-purple-dark uppercase mb-2">
+                  <div className="mb-4 p-4 bg-lingo-blue/10 border-2 border-lingo-blue rounded-xl">
+                    <p className="text-[11px] font-bold text-lingo-blue-dark uppercase mb-2">
                       {response.set_title || 'Shared Information'}
                     </p>
                     <p className="text-sm text-gray-800 whitespace-pre-wrap font-mono font-medium">{response.set_stimulus}</p>

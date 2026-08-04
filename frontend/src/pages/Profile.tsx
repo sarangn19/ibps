@@ -62,7 +62,7 @@ const Profile: React.FC = () => {
         {user?.referral_code && (
           <div className="lingo-card p-5 mb-6">
             <div className="flex items-center gap-2 mb-1">
-              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-lingo-yellow/25 text-lingo-yellow-dark">
+              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-lingo-blue/15 text-lingo-blue-dark">
                 <Gift className="h-4 w-4" />
               </span>
               <h2 className="font-extrabold text-gray-900">Refer a friend</h2>
@@ -72,7 +72,7 @@ const Profile: React.FC = () => {
             </p>
             <div className="flex items-center gap-2">
               <div className="flex-1 flex items-center justify-between gap-2 border-2 border-lingo-border rounded-xl px-4 py-3">
-                <span className="text-lg font-extrabold tracking-widest text-lingo-green-dark">{user.referral_code}</span>
+                <span className="text-lg font-extrabold tracking-widest text-lingo-blue-dark">{user.referral_code}</span>
                 <span className="text-[10px] text-gray-400 font-bold uppercase">your code</span>
               </div>
               <button

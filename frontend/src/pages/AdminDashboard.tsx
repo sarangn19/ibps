@@ -167,7 +167,7 @@ const AdminDashboard: React.FC = () => {
             <Link to="/admin/cohort" className="text-gray-600 hover:text-gray-900 hidden sm:inline">Cohort</Link>
             <Link to="/admin/research" className="text-gray-600 hover:text-gray-900 shrink-0">UX Research</Link>
             {user?.role === 'superadmin' && (
-              <Link to="/admin/superadmin" className="flex items-center gap-1 text-purple-600 font-medium shrink-0">
+              <Link to="/admin/superadmin" className="flex items-center gap-1 text-lingo-blue-dark font-medium shrink-0">
                 <Shield className="h-3.5 w-3.5" /> Admin
               </Link>
             )}
@@ -184,11 +184,11 @@ const AdminDashboard: React.FC = () => {
             <p className="text-2xl font-bold text-gray-900">{students.length}</p>
           </div>
           <div className="bg-white rounded-lg shadow-sm border p-4">
-            <div className="flex items-center gap-2 text-green-600 mb-1"><Award className="h-4 w-4" /><span className="text-xs font-medium uppercase">Tests Taken</span></div>
+            <div className="flex items-center gap-2 text-blue-600 mb-1"><Award className="h-4 w-4" /><span className="text-xs font-medium uppercase">Tests Taken</span></div>
             <p className="text-2xl font-bold text-gray-900">{students.reduce((s, st) => s + st.tests_completed, 0)}</p>
           </div>
           <div className="bg-white rounded-lg shadow-sm border p-4">
-            <div className="flex items-center gap-2 text-purple-600 mb-1"><BarChart3 className="h-4 w-4" /><span className="text-xs font-medium uppercase">Avg Score</span></div>
+            <div className="flex items-center gap-2 text-blue-600 mb-1"><BarChart3 className="h-4 w-4" /><span className="text-xs font-medium uppercase">Avg Score</span></div>
             <p className="text-2xl font-bold text-gray-900">
               {students.length > 0 ? (students.reduce((s, st) => s + (st.avg_score || 0), 0) / students.length).toFixed(1) : '—'}
             </p>

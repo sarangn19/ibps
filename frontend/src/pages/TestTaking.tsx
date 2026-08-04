@@ -192,7 +192,7 @@ const TestTaking: React.FC = () => {
                 currentQuestionIndex === index
                   ? 'bg-lingo-blue text-white'
                   : isMarked
-                  ? 'bg-lingo-yellow text-lingo-yellow-dark'
+                  ? 'bg-lingo-bg text-gray-500 border-2 border-lingo-border'
                   : isAnswered
                   ? 'bg-lingo-green/15 text-lingo-green-dark'
                   : 'bg-lingo-bg text-gray-700 border-2 border-lingo-border hover:border-lingo-blue'
@@ -210,7 +210,7 @@ const TestTaking: React.FC = () => {
           <span className="text-gray-600">Answered</span>
         </div>
         <div className="flex items-center space-x-2">
-          <div className="w-4 h-4 bg-lingo-yellow rounded"></div>
+          <div className="w-4 h-4 bg-lingo-bg rounded border-2 border-lingo-border"></div>
           <span className="text-gray-600">Marked for Review</span>
         </div>
         <div className="flex items-center space-x-2">
@@ -221,7 +221,7 @@ const TestTaking: React.FC = () => {
 
       <button
         onClick={handleSubmitTest}
-        className="w-full mt-6 lingo-btn lingo-btn-green"
+        className="w-full mt-6 lingo-btn lingo-btn-blue"
       >
         Submit Test
       </button>
@@ -263,7 +263,7 @@ const TestTaking: React.FC = () => {
             <button
               onClick={() => setMarkedForReview(!markedForReview)}
               className={`touch-target flex items-center gap-1 px-3 py-1.5 rounded-xl text-sm font-bold border-2 ${
-                markedForReview ? 'bg-lingo-yellow/20 text-lingo-yellow-dark border-lingo-yellow' : 'bg-lingo-bg text-gray-600 border-lingo-border'
+                markedForReview ? 'bg-lingo-blue/10 text-lingo-blue-dark border-lingo-blue' : 'bg-lingo-bg text-gray-600 border-lingo-border'
               }`}
             >
               <Flag className="h-4 w-4" />
@@ -273,8 +273,8 @@ const TestTaking: React.FC = () => {
 
           <div className="mb-6">
             {currentQuestion.set_stimulus && (
-              <div className="mb-4 p-4 bg-lingo-purple/15 border-2 border-lingo-purple rounded-xl">
-                <p className="text-[11px] font-bold text-lingo-purple-dark uppercase mb-2">
+              <div className="mb-4 p-4 bg-lingo-blue/10 border-2 border-lingo-blue rounded-xl">
+                <p className="text-[11px] font-bold text-lingo-blue-dark uppercase mb-2">
                   {currentQuestion.set_title || 'Shared Information'}
                 </p>
                 <p className="text-sm text-gray-800 whitespace-pre-wrap font-mono font-medium">{currentQuestion.set_stimulus}</p>
@@ -322,7 +322,7 @@ const TestTaking: React.FC = () => {
 
           <button
             onClick={() => setShowNavigator(true)}
-            className="touch-target flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-lingo-purple/15 text-lingo-purple-dark text-sm font-extrabold border-b-4 border-lingo-purple/40"
+            className="touch-target flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-lingo-blue/10 text-lingo-blue-dark text-sm font-extrabold border-b-4 border-lingo-blue/30"
           >
             <Grid3X3 className="h-4 w-4" />
             <span>{Object.keys(responses).length} answered</span>
@@ -331,7 +331,7 @@ const TestTaking: React.FC = () => {
           {currentQuestionIndex === questions.length - 1 ? (
             <button
               onClick={handleSubmitTest}
-              className="touch-target px-5 py-2.5 rounded-xl bg-lingo-green text-white hover:bg-lingo-green-dark text-sm font-extrabold border-b-4 border-lingo-green-dark"
+              className="touch-target px-5 py-2.5 rounded-xl bg-lingo-blue text-white hover:bg-lingo-blue-dark text-sm font-extrabold border-b-4 border-lingo-blue-dark"
             >
               Submit
             </button>

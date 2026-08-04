@@ -64,7 +64,7 @@ const QuestionBank: React.FC = () => {
   const pages = Math.max(Math.ceil(total / pageSize), 1);
   const from = total === 0 ? 0 : (page - 1) * pageSize + 1;
   const to = Math.min(page * pageSize, total);
-  const subjectColors = ['bg-blue-100 text-blue-800', 'bg-green-100 text-green-800', 'bg-purple-100 text-purple-800', 'bg-orange-100 text-orange-800', 'bg-pink-100 text-pink-800', 'bg-teal-100 text-teal-800', 'bg-indigo-100 text-indigo-800'];
+  const subjectColors = ['bg-blue-100 text-blue-800', 'bg-green-100 text-green-800', 'bg-lingo-border text-gray-700', 'bg-gray-100 text-gray-700', 'bg-blue-50 text-blue-700', 'bg-green-50 text-green-700', 'bg-gray-200 text-gray-800'];
 
   const openNew = () => {
     setForm(emptyForm());
@@ -125,8 +125,8 @@ const QuestionBank: React.FC = () => {
   };
 
   const tagColor = (d: string) =>
-    d === 'easy' ? 'bg-green-100 text-green-800' : d === 'hard' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800';
-  const stageColor = (s: string) => s === 'mains' ? 'bg-orange-100 text-orange-800' : 'bg-teal-100 text-teal-800';
+    d === 'easy' ? 'bg-green-100 text-green-800' : d === 'hard' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800';
+  const stageColor = (s: string) => s === 'mains' ? 'bg-lingo-blue/15 text-lingo-blue-dark' : 'bg-lingo-border text-gray-700';
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -234,7 +234,7 @@ const QuestionBank: React.FC = () => {
                         <p className="text-gray-900">{q.subject}</p>
                         <p className="text-xs text-gray-500">{q.topic}{q.subtopic ? ' · ' + q.subtopic : ''}</p>
                         {q.set_title && (
-                          <span className="inline-block mt-1 px-2 py-0.5 text-[10px] rounded-full bg-indigo-100 text-indigo-700">
+                          <span className="inline-block mt-1 px-2 py-0.5 text-[10px] rounded-full bg-lingo-border text-gray-700">
                             set · {q.set_type} · {q.set_title}
                           </span>
                         )}

@@ -60,11 +60,11 @@ const CohortView: React.FC = () => {
             <p className="text-2xl font-bold text-gray-900">{engagement.tests_completed ?? 0}</p>
           </div>
           <div className="bg-white rounded-lg shadow-sm border p-4">
-            <div className="flex items-center gap-2 text-purple-600 mb-1"><Inbox className="h-4 w-4" /><span className="text-xs font-medium uppercase">In Progress</span></div>
+            <div className="flex items-center gap-2 text-blue-600 mb-1"><Inbox className="h-4 w-4" /><span className="text-xs font-medium uppercase">In Progress</span></div>
             <p className="text-2xl font-bold text-gray-900">{engagement.tests_in_progress ?? 0}</p>
           </div>
           <div className="bg-white rounded-lg shadow-sm border p-4">
-            <div className="flex items-center gap-2 text-orange-600 mb-1"><XCircle className="h-4 w-4" /><span className="text-xs font-medium uppercase">Abandoned</span></div>
+            <div className="flex items-center gap-2 text-red-600 mb-1"><XCircle className="h-4 w-4" /><span className="text-xs font-medium uppercase">Abandoned</span></div>
             <p className="text-2xl font-bold text-gray-900">{engagement.tests_abandoned ?? 0}</p>
           </div>
         </div>
@@ -103,10 +103,10 @@ const CohortView: React.FC = () => {
                   const pct = total > 0 ? (parseInt(d.count) / total) * 100 : 0;
                   const colors: Record<string, string> = {
                     'negative': 'bg-red-500',
-                    'zero': 'bg-gray-500',
-                    '1-25': 'bg-orange-500',
-                    '26-50': 'bg-yellow-500',
-                    '51-75': 'bg-blue-500',
+                    'zero': 'bg-gray-400',
+                    '1-25': 'bg-red-400',
+                    '26-50': 'bg-blue-500',
+                    '51-75': 'bg-blue-600',
                     '76+': 'bg-green-500',
                   };
                   const barColor = colors[d.score_range] || 'bg-blue-500';

@@ -98,10 +98,10 @@ const Dashboard: React.FC = () => {
 
   const typeColor = (type: string) => {
     switch (type) {
-      case 'full_mock': return 'bg-purple-100 text-purple-800';
-      case 'sectional': return 'bg-blue-100 text-blue-800';
-      case 'topic_practice': return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'full_mock': return 'bg-lingo-blue/10 text-lingo-blue-dark';
+      case 'sectional': return 'bg-lingo-border text-gray-700';
+      case 'topic_practice': return 'bg-lingo-border text-gray-700';
+      default: return 'bg-lingo-border text-gray-700';
     }
   };
 
@@ -114,7 +114,7 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  const stageColor = (stage: string) => stage === 'mains' ? 'bg-orange-100 text-orange-800' : 'bg-teal-100 text-teal-800';
+  const stageColor = (_stage: string) => 'bg-lingo-border text-gray-600';
 
   if (loading) {
     return (
@@ -203,7 +203,7 @@ const Dashboard: React.FC = () => {
           <div className="flex items-start justify-between">
             <div>
               <div className="flex items-center space-x-2 mb-2">
-                <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-lingo-orange text-white">
+                <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-lingo-blue text-white">
                   <Target className="h-5 w-5" />
                 </span>
                 <h2 className="text-lg font-extrabold text-gray-900">Focus on Your Weak Areas</h2>
@@ -238,7 +238,7 @@ const Dashboard: React.FC = () => {
                       <p className="font-bold text-gray-900 text-sm">{rec.topic}</p>
                       <p className="text-xs text-gray-600">{rec.subtopic}</p>
                     </div>
-                    <span className={`px-2 py-0.5 ${rec.classification === 'not_attempted' ? 'bg-lingo-border text-gray-600' : rec.classification === 'developing' ? 'bg-lingo-yellow/20 text-lingo-yellow-dark' : 'bg-lingo-red/15 text-lingo-red'} text-xs rounded-xl font-bold uppercase`}>
+                    <span className={`px-2 py-0.5 ${rec.classification === 'not_attempted' ? 'bg-lingo-border text-gray-600' : rec.classification === 'developing' ? 'bg-lingo-blue/15 text-lingo-blue-dark' : 'bg-lingo-red/15 text-lingo-red'} text-xs rounded-xl font-bold uppercase`}>
                       {rec.classification === 'not_attempted' ? 'New' : rec.classification === 'developing' ? 'Developing' : 'Weak'}
                     </span>
                   </div>
@@ -250,7 +250,7 @@ const Dashboard: React.FC = () => {
                       if (rec.scope.subtopic) p.set('subtopic', rec.scope.subtopic);
                       navigate(`/practice/start?${p.toString()}`);
                     }}
-                    className="w-full py-1.5 bg-lingo-orange text-white text-sm rounded-xl font-bold hover:bg-lingo-orange-dark"
+                    className="w-full py-1.5 bg-lingo-blue text-white text-sm rounded-xl font-bold hover:bg-lingo-blue-dark"
                   >
                     Practice Now
                   </button>
@@ -264,12 +264,12 @@ const Dashboard: React.FC = () => {
         {studyPlan && (
           <div>
             <h2 className="text-xl font-extrabold text-gray-900 flex items-center gap-2 mb-3">
-              <Calendar className="h-5 w-5 text-lingo-green" />
+              <Calendar className="h-5 w-5 text-lingo-blue-dark" />
               Your Weekly Study Plan
             </h2>
             <div className="lingo-card p-5">
               <div className="flex flex-wrap gap-3 mb-4 text-sm">
-                <span className="lingo-chip bg-lingo-green/15 text-lingo-green-dark">{studyPlan.exam_goal} {studyPlan.target_year}</span>
+                <span className="lingo-chip bg-lingo-blue/15 text-lingo-blue-dark">{studyPlan.exam_goal} {studyPlan.target_year}</span>
                 <span className="lingo-chip bg-lingo-bg text-gray-700 capitalize">{studyPlan.prep_level}</span>
                 <span className="lingo-chip bg-lingo-bg text-gray-700">~{studyPlan.questions_per_day} questions/day</span>
                 {studyPlan.avg_accuracy !== null && (
@@ -279,7 +279,7 @@ const Dashboard: React.FC = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                 {studyPlan.weekly_plan.slice(0, 4).map(d => (
                   <div key={d.day} className="border-2 border-lingo-border rounded-xl p-3">
-                    <p className="text-xs font-bold text-lingo-green-dark uppercase">{d.day_name}</p>
+                    <p className="text-xs font-bold text-lingo-blue-dark uppercase">{d.day_name}</p>
                     <p className="font-bold text-gray-900 text-sm mt-1">{d.focus_subject}</p>
                     <p className="text-xs text-gray-600">{d.topics.join(', ')}</p>
                     <p className="text-xs text-gray-500 mt-2">{d.questions_to_practice} questions</p>
@@ -295,7 +295,7 @@ const Dashboard: React.FC = () => {
           {/* Expertise Map */}
           <div className="space-y-4 order-1 lg:order-2">
             <h2 className="text-xl font-extrabold text-gray-900 flex items-center gap-2">
-              <Brain className="h-5 w-5 text-lingo-purple-dark" />
+              <Brain className="h-5 w-5 text-lingo-blue-dark" />
               Your Expertise Map
             </h2>
             <p className="text-xs text-gray-500">Live mastery tracking — updates as you practice</p>
@@ -358,7 +358,7 @@ const Dashboard: React.FC = () => {
                           <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" />{test.duration_minutes}min</span>
                           <span className="flex items-center gap-1"><BarChart3 className="h-3.5 w-3.5" />{Array.isArray(test.question_ids) ? test.question_ids.length : 0} Qs</span>
                           {test.negative_marking_ratio > 0 && (
-                            <span className="text-lingo-orange-dark font-bold">-{(test.negative_marking_ratio * 100).toFixed(0)}% neg</span>
+                            <span className="text-gray-500 font-bold">-{(test.negative_marking_ratio * 100).toFixed(0)}% neg</span>
                           )}
                         </div>
 
@@ -367,7 +367,7 @@ const Dashboard: React.FC = () => {
                             <>
                               <button
                                 onClick={() => navigate(`/test/${test.id}`)}
-                                className="px-4 py-2 bg-lingo-green text-white text-sm rounded-xl font-bold border-b-4 border-lingo-green-dark hover:bg-lingo-green-dark active:scale-[0.97] whitespace-nowrap"
+                                className="px-4 py-2 bg-lingo-blue text-white text-sm rounded-xl font-bold border-b-4 border-lingo-blue-dark hover:bg-lingo-blue-dark active:scale-[0.97] whitespace-nowrap"
                               >
                                 Resume Test
                               </button>
@@ -415,7 +415,7 @@ const Dashboard: React.FC = () => {
             <p className="text-xs text-gray-500">attempted</p>
           </div>
           <div className="lingo-card p-4">
-            <div className="flex items-center gap-2 text-lingo-green-dark mb-1">
+            <div className="flex items-center gap-2 text-lingo-blue-dark mb-1">
               <Award className="h-4 w-4" />
               <span className="text-xs font-extrabold uppercase tracking-wide">Subjects</span>
             </div>
@@ -423,7 +423,7 @@ const Dashboard: React.FC = () => {
             <p className="text-xs text-gray-500">available</p>
           </div>
           <div className="lingo-card p-4">
-            <div className="flex items-center gap-2 text-lingo-purple-dark mb-1">
+            <div className="flex items-center gap-2 text-lingo-blue-dark mb-1">
               <TrendingUp className="h-4 w-4" />
               <span className="text-xs font-extrabold uppercase tracking-wide">Topics</span>
             </div>
@@ -431,7 +431,7 @@ const Dashboard: React.FC = () => {
             <p className="text-xs text-gray-500">to practice</p>
           </div>
           <div className="lingo-card p-4">
-            <div className="flex items-center gap-2 text-lingo-orange-dark mb-1">
+            <div className="flex items-center gap-2 text-lingo-blue-dark mb-1">
               <Target className="h-4 w-4" />
               <span className="text-xs font-extrabold uppercase tracking-wide">Questions</span>
             </div>

@@ -31,9 +31,9 @@ const InsightPanel: React.FC<{ insights: Insight[]; title?: string; maxVisible?:
   return (
     <div>
       <h2 className="text-xl font-extrabold text-gray-900 flex items-center gap-2 mb-3">
-        <Sparkles className="h-5 w-5 text-lingo-purple-dark" />
+        <Sparkles className="h-5 w-5 text-lingo-blue-dark" />
         {title}
-        <span className="text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full bg-lingo-purple/15 text-lingo-purple-dark font-bold">
+        <span className="text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full bg-lingo-blue/15 text-lingo-blue-dark font-bold">
           Instant
         </span>
       </h2>

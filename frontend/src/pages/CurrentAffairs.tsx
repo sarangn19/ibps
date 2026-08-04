@@ -62,7 +62,7 @@ const CurrentAffairs: React.FC = () => {
       <PageHeader
         title="Current Affairs"
         onBack={() => navigate('/dashboard')}
-        right={<Newspaper className="h-5 w-5 text-lingo-green" />}
+        right={<Newspaper className="h-5 w-5 text-lingo-blue" />}
       />
 
       <div className="max-w-lg mx-auto px-4 pt-5 pb-nav space-y-4">
@@ -71,7 +71,7 @@ const CurrentAffairs: React.FC = () => {
           <button
             onClick={() => setMode('read')}
             className={`touch-target flex items-center justify-center gap-2 py-2 rounded-xl text-sm font-bold transition-colors ${
-              mode === 'read' ? 'bg-lingo-green text-white' : 'text-gray-600 hover:bg-lingo-bg'
+              mode === 'read' ? 'bg-lingo-blue text-white' : 'text-gray-600 hover:bg-lingo-bg'
             }`}
           >
             <BookOpen className="h-4 w-4" />
@@ -80,7 +80,7 @@ const CurrentAffairs: React.FC = () => {
           <button
             onClick={() => setMode('quiz')}
             className={`touch-target flex items-center justify-center gap-2 py-2 rounded-xl text-sm font-bold transition-colors ${
-              mode === 'quiz' ? 'bg-lingo-green text-white' : 'text-gray-600 hover:bg-lingo-bg'
+              mode === 'quiz' ? 'bg-lingo-blue text-white' : 'text-gray-600 hover:bg-lingo-bg'
             }`}
           >
             <Newspaper className="h-4 w-4" />
@@ -95,7 +95,7 @@ const CurrentAffairs: React.FC = () => {
               key={c.value}
               onClick={() => setCategory(c.value)}
               className={`shrink-0 px-3 py-1.5 rounded-xl text-xs font-bold touch-target border-2 ${
-                category === c.value ? 'bg-lingo-green border-lingo-green text-white' : 'bg-white border-lingo-border text-gray-600 hover:border-lingo-green'
+                category === c.value ? 'bg-lingo-blue border-lingo-blue text-white' : 'bg-white border-lingo-border text-gray-600 hover:border-lingo-blue'
               }`}
             >
               {c.label}
@@ -122,7 +122,7 @@ const CurrentAffairs: React.FC = () => {
           selectedArticle ? (
             <div className="lingo-card overflow-hidden">
               <div className="p-5">
-                <span className="inline-block px-2 py-0.5 bg-lingo-green/15 text-lingo-green-dark rounded-xl text-xs font-bold uppercase mb-3">
+                <span className="inline-block px-2 py-0.5 bg-lingo-blue/15 text-lingo-blue-dark rounded-xl text-xs font-bold uppercase mb-3">
                   {selectedArticle.category}
                 </span>
                 <h2 className="text-lg font-extrabold text-gray-900 leading-snug">{selectedArticle.title}</h2>
@@ -170,7 +170,7 @@ const CurrentAffairs: React.FC = () => {
                   onClick={() => setSelectedArticle(a)}
                   className="w-full text-left lingo-card p-4 hover:-translate-y-0.5 transition-transform touch-target"
                 >
-                  <span className="inline-block px-2 py-0.5 bg-lingo-green/15 text-lingo-green-dark rounded-xl text-xs font-bold uppercase mb-2">
+                  <span className="inline-block px-2 py-0.5 bg-lingo-blue/15 text-lingo-blue-dark rounded-xl text-xs font-bold uppercase mb-2">
                     {a.category}
                   </span>
                   <h3 className="text-sm font-extrabold text-gray-900 leading-snug">{a.title}</h3>
@@ -219,7 +219,7 @@ const CurrentAffairs: React.FC = () => {
                                 ? 'border-lingo-red bg-lingo-red/10 text-lingo-red'
                                 : isSelected
                                   ? 'border-lingo-blue bg-lingo-blue/10 text-lingo-blue-dark'
-                                  : 'border-lingo-border text-gray-700 hover:border-lingo-green'
+                                  : 'border-lingo-border text-gray-700 hover:border-lingo-blue'
                           }`}
                         >
                           <span className="shrink-0 w-5 h-5 rounded-full border-2 border-current flex items-center justify-center text-xs font-bold">

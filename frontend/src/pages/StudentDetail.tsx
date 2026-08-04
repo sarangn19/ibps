@@ -7,7 +7,7 @@ import { Clock, Brain, Gift } from 'lucide-react';
 const classificationColor = (cls: string) => {
   switch (cls) {
     case 'strong': return 'text-green-600 bg-green-50';
-    case 'developing': return 'text-yellow-600 bg-yellow-50';
+    case 'developing': return 'text-blue-600 bg-blue-50';
     case 'weak': return 'text-red-600 bg-red-50';
     default: return 'text-gray-400 bg-gray-50';
   }
@@ -243,7 +243,7 @@ const StudentDetail: React.FC = () => {
                     <span className={`px-1.5 py-0.5 text-xs rounded-full ${classificationColor(m.classification)}`}>{m.classification}</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-1.5">
-                    <div className={`h-1.5 rounded-full ${m.classification === 'strong' ? 'bg-green-500' : m.classification === 'developing' ? 'bg-yellow-500' : 'bg-red-500'}`}
+                    <div className={`h-1.5 rounded-full ${m.classification === 'strong' ? 'bg-green-500' : m.classification === 'developing' ? 'bg-blue-500' : 'bg-red-500'}`}
                       style={{ width: `${m.mastery_score}%` }}></div>
                   </div>
                   <div className="flex items-center gap-3 text-xs text-gray-500 mt-1">
@@ -267,8 +267,8 @@ const StudentDetail: React.FC = () => {
                   <span className="text-xs text-gray-400 w-16 shrink-0">{new Date(log.timestamp).toLocaleDateString()}</span>
                   <span className={`px-1.5 py-0.5 text-xs rounded-full ${
                     log.event_type === 'login' ? 'bg-blue-100 text-blue-700' :
-                    log.event_type === 'test_started' ? 'bg-green-100 text-green-700' :
-                    log.event_type === 'test_submitted' ? 'bg-purple-100 text-purple-700' :
+                    log.event_type === 'test_started' ? 'bg-lingo-blue/15 text-lingo-blue-dark' :
+                    log.event_type === 'test_submitted' ? 'bg-green-100 text-green-700' :
                     'bg-gray-100 text-gray-700'
                   }`}>{log.event_type.replace(/_/g, ' ')}</span>
                 </div>

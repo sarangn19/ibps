@@ -200,7 +200,7 @@ const StudentList: React.FC = () => {
                       <td className="px-4 py-3 font-semibold">{s.accuracy || 0}%</td>
                       <td className="px-4 py-3">
                         <span className="inline-flex items-center gap-1">
-                          <Flame className={`h-4 w-4 ${(s.streak || 0) >= 2 ? 'text-orange-500' : 'text-gray-300'}`} />
+                          <Flame className={`h-4 w-4 ${(s.streak || 0) >= 2 ? 'text-lingo-blue-dark' : 'text-gray-300'}`} />
                           {s.streak || 0}
                         </span>
                       </td>
@@ -309,7 +309,7 @@ const StudentDetail: React.FC = () => {
                 <p className="text-xs text-gray-500">active days</p>
               </div>
               <div className="text-center">
-                <p className="text-lg font-bold text-gray-900">{l.streak || 0}<Flame className="inline h-4 w-4 text-orange-500" /></p>
+                <p className="text-lg font-bold text-gray-900">{l.streak || 0}<Flame className="inline h-4 w-4 text-lingo-blue-dark" /></p>
                 <p className="text-xs text-gray-500">streak</p>
               </div>
               <div className="text-center">
@@ -363,7 +363,7 @@ const StudentDetail: React.FC = () => {
                       <span className="font-semibold">{s.accuracy}% · {s.attempted} q</span>
                     </div>
                     <div className="mt-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-                      <div className={`h-2 rounded-full ${s.accuracy >= 70 ? 'bg-green-500' : s.accuracy >= 40 ? 'bg-yellow-500' : 'bg-red-500'}`} style={{ width: `${s.accuracy}%` }}></div>
+                      <div className={`h-2 rounded-full ${s.accuracy >= 70 ? 'bg-green-500' : s.accuracy >= 40 ? 'bg-blue-500' : 'bg-red-500'}`} style={{ width: `${s.accuracy}%` }}></div>
                     </div>
                   </div>
                 ))}
@@ -403,7 +403,7 @@ const StudentDetail: React.FC = () => {
                     <span className="text-sm text-gray-700 truncate">{m.subject} · {m.topic}</span>
                     <span className="flex items-center gap-2 shrink-0">
                       <span className={`px-1.5 py-0.5 rounded text-[11px] font-semibold ${
-                        m.classification === 'strong' ? 'bg-green-100 text-green-700' : m.classification === 'developing' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'
+                        m.classification === 'strong' ? 'bg-green-100 text-green-700' : m.classification === 'developing' ? 'bg-blue-100 text-blue-700' : 'bg-red-100 text-red-700'
                       }`}>{m.classification}</span>
                       <span className="text-sm font-semibold w-8 text-right">{m.score}</span>
                     </span>

@@ -38,7 +38,7 @@ const Stat: React.FC<{ label: string; value: React.ReactNode; sub?: string; colo
 
 const Bar: React.FC<{ label: string; value: number; max?: number; suffix?: string; sub?: string }> = ({ label, value, max = 100, suffix = '%', sub }) => {
   const w = max > 0 ? Math.min(100, Math.round((value / max) * 100)) : 0;
-  const color = value >= 70 ? 'bg-green-500' : value >= 40 ? 'bg-yellow-500' : 'bg-red-500';
+  const color = value >= 70 ? 'bg-green-500' : value >= 40 ? 'bg-blue-500' : 'bg-red-500';
   return (
     <div className="flex items-center gap-3">
       <span className="text-sm text-gray-600 w-32 shrink-0 truncate">{label}</span>
@@ -78,14 +78,14 @@ const UxResearch: React.FC = () => {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <Stat label="Students" value={o.students || 0} />
               <Stat label="DAU" value={o.dau || 0} sub="active last 24h" color="text-blue-600" />
-              <Stat label="WAU" value={o.wau || 0} sub="active last 7d" color="text-purple-600" />
+              <Stat label="WAU" value={o.wau || 0} sub="active last 7d" color="text-blue-600" />
               <Stat label="Premium" value={o.premium_students || 0} sub="paid subscribers" color="text-green-600" />
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <Stat label="Accuracy" value={`${data.accuracy?.accuracy || 0}%`} sub={`${data.accuracy?.attempted || 0} attempted`} />
               <Stat label="Avg session" value={`${data.learning?.avg_study_minutes || 0} min`} sub="per active day" />
               <Stat label="Questions/day" value={data.learning?.questions_per_active_day || 0} sub="per active day" />
-              <Stat label="Consistency" value={<span className="flex items-center gap-1">{data.learning?.avg_consistency_days || 0}<Flame className="h-5 w-5 text-orange-500" /></span>} sub="avg day streak" />
+              <Stat label="Consistency" value={<span className="flex items-center gap-1">{data.learning?.avg_consistency_days || 0}<Flame className="h-5 w-5 text-lingo-blue-dark" /></span>} sub="avg day streak" />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Stat label="Strong subject" value={data.learning?.strong_subject?.name || '—'} sub={data.learning?.strong_subject ? `${data.learning.strong_subject.accuracy}% accuracy` : undefined} color="text-green-600" />
@@ -94,7 +94,7 @@ const UxResearch: React.FC = () => {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Stat label="Mock completion" value={`${data.mock?.mocks_completed_pct || 0}%`} sub={`${o.mocks_completed || 0}/${o.mocks_total || 0} finished`} />
-              <Stat label="7-day retention" value={`${data.retention?.day7 || 0}%`} color="text-purple-600" />
+              <Stat label="7-day retention" value={`${data.retention?.day7 || 0}%`} color="text-blue-600" />
               <Stat label="Mock avg score" value={data.mock?.avg_score || '—'} />
             </div>
             <Card title="Most searched" className="border-l-4 border-l-lingo-blue">
@@ -167,7 +167,7 @@ const UxResearch: React.FC = () => {
                   {(data.mock?.slowest_topics || []).map((t: any) => (
                     <div key={t.topic} className="flex items-center justify-between text-sm">
                       <span className="text-gray-700 font-medium">{t.topic}</span>
-                      <span className="text-orange-600 font-bold">{t.avg_time}s avg</span>
+                      <span className="text-red-600 font-bold">{t.avg_time}s avg</span>
                     </div>
                   ))}
                   {(data.mock?.slowest_topics || []).length === 0 && <p className="text-sm text-gray-500">No data yet.</p>}
@@ -242,7 +242,7 @@ const UxResearch: React.FC = () => {
               <div key={p.user_id} className="bg-white rounded-lg shadow-sm border p-4">
                 <div className="flex items-center justify-between">
                   <p className="font-semibold text-gray-900 flex items-center gap-2">
-                    <Brain className="h-4 w-4 text-purple-600" />
+                    <Brain className="h-4 w-4 text-lingo-blue-dark" />
                     {p.persona}
                   </p>
                   <span className="text-xs text-gray-400">user #{p.user_id}</span>
@@ -263,11 +263,11 @@ const UxResearch: React.FC = () => {
       case 'coach':
         return (
           <div className="space-y-4">
-            <Card title="AI Product Coach" className="border-l-4 border-l-purple-500">
+            <Card title="AI Product Coach" className="border-l-4 border-l-lingo-blue">
               <div className="space-y-2">
                 {(data.coach?.summary || []).map((l: string, i: number) => (
                   <p key={i} className="text-sm text-gray-700 flex items-start gap-2">
-                    <Sparkles className="h-4 w-4 text-purple-500 shrink-0 mt-0.5" />
+                    <Sparkles className="h-4 w-4 text-lingo-blue-dark shrink-0 mt-0.5" />
                     {l}
                   </p>
                 ))}
@@ -278,7 +278,7 @@ const UxResearch: React.FC = () => {
                 <div className="space-y-2">
                   {(data.coach?.recommendations || []).map((r: string, i: number) => (
                     <p key={i} className="text-sm text-gray-700 flex items-start gap-2">
-                      <Zap className="h-4 w-4 text-lingo-yellow-dark shrink-0 mt-0.5" />
+                      <Zap className="h-4 w-4 text-lingo-blue-dark shrink-0 mt-0.5" />
                       {r}
                     </p>
                   ))}
@@ -321,7 +321,7 @@ const UxResearch: React.FC = () => {
           ))}
           <button
             onClick={() => navigate('/admin/research/students')}
-            className="shrink-0 px-3 py-2 rounded-lg text-sm font-semibold bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
+            className="shrink-0 px-3 py-2 rounded-lg text-sm font-semibold bg-lingo-blue-dark text-white hover:bg-lingo-blue-dark transition-colors"
           >
             Every Student →
           </button>

@@ -44,8 +44,8 @@ const Paywall: React.FC = () => {
       <div className="w-full max-w-md">
         <div className="lingo-card overflow-hidden">
           <div className="p-6 text-center">
-            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-3xl bg-lingo-yellow/25 mb-4">
-              <Lock className="h-10 w-10 text-lingo-yellow-dark" />
+            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-3xl bg-lingo-blue/15 mb-4">
+              <Lock className="h-10 w-10 text-lingo-blue-dark" />
             </div>
 
             {locked && (
@@ -94,7 +94,7 @@ const Paywall: React.FC = () => {
           <div className="px-6 pb-6">
             <div className="rounded-2xl border-2 border-lingo-border bg-lingo-bg p-4 mb-4">
               <div className="flex items-center gap-2 mb-3">
-                <Sparkles className="h-4 w-4 text-lingo-yellow-dark" />
+                <Sparkles className="h-4 w-4 text-lingo-blue-dark" />
                 <span className="text-sm font-extrabold text-gray-900">IBPS Coaching Pro</span>
               </div>
               <ul className="space-y-2">

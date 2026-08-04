@@ -45,7 +45,7 @@ interface HistoryPoint {
 const classificationColor = (cls: string) => {
   switch (cls) {
     case 'strong': return 'bg-green-100 text-green-800 border-green-300';
-    case 'developing': return 'bg-yellow-100 text-yellow-800 border-yellow-300';
+    case 'developing': return 'bg-blue-100 text-blue-800 border-blue-300';
     case 'weak': return 'bg-red-100 text-red-800 border-red-300';
     case 'not_attempted': return 'bg-gray-100 text-gray-500 border-gray-200';
     default: return 'bg-gray-50 text-gray-400 border-gray-100';
@@ -62,7 +62,7 @@ const classificationIcon = (cls: string) => {
 };
 
 const masteryBar = (score: number) => {
-  const color = score >= 70 ? 'bg-green-500' : score >= 40 ? 'bg-yellow-500' : 'bg-red-500';
+  const color = score >= 70 ? 'bg-green-500' : score >= 40 ? 'bg-blue-500' : 'bg-red-500';
   return (
     <div className="w-full bg-gray-200 rounded-full h-2">
       <div className={`${color} h-2 rounded-full transition-all`} style={{ width: `${Math.max(2, score)}%` }}></div>
@@ -75,7 +75,7 @@ const accuracyPct = (b?: { c: number; a: number }) => (b && b.a > 0 ? Math.round
 const diffBar = (label: string, pct: number | null) => (
   <span className="flex items-center gap-1">
     <span className="text-gray-400">{label}</span>
-    <span className={`text-xs font-semibold ${pct === null ? 'text-gray-300' : pct >= 70 ? 'text-green-600' : pct >= 40 ? 'text-yellow-600' : 'text-red-600'}`}>
+    <span className={`text-xs font-semibold ${pct === null ? 'text-gray-300' : pct >= 70 ? 'text-green-600' : pct >= 40 ? 'text-blue-600' : 'text-red-600'}`}>
       {pct === null ? '—' : `${pct}%`}
     </span>
   </span>
@@ -203,7 +203,7 @@ const ExpertiseMap: React.FC = () => {
                           <div key={st.subtopic} className="p-2 rounded-lg hover:bg-gray-50">
                             <div className="flex items-center gap-3">
                               <div className="flex items-center gap-1.5 text-xs min-w-[80px]">
-                                <span className={classificationColor(st.classification).split(' ')[0] === 'bg-green-100' ? 'text-green-600' : classificationColor(st.classification).split(' ')[0] === 'bg-yellow-100' ? 'text-yellow-600' : classificationColor(st.classification).split(' ')[0] === 'bg-red-100' ? 'text-red-600' : 'text-gray-400'}>
+                                <span className={classificationColor(st.classification).split(' ')[0] === 'bg-green-100' ? 'text-green-600' : classificationColor(st.classification).split(' ')[0] === 'bg-blue-100' ? 'text-blue-600' : classificationColor(st.classification).split(' ')[0] === 'bg-red-100' ? 'text-red-600' : 'text-gray-400'}>
                                   {classificationIcon(st.classification)}
                                 </span>
                                 <span className="text-gray-700 truncate max-w-[110px]">{st.subtopic}</span>
@@ -226,12 +226,12 @@ const ExpertiseMap: React.FC = () => {
                             {(st.current_streak >= 3 || st.days_since_last_attempt !== null || Object.keys(diff).length > 0) && (
                               <div className="flex items-center gap-3 mt-1.5 pl-[80px] flex-wrap">
                                 {st.current_streak >= 3 && (
-                                  <span className="flex items-center gap-1 text-xs text-orange-600 bg-orange-50 rounded-full px-2 py-0.5">
+                                  <span className="flex items-center gap-1 text-xs text-lingo-blue-dark bg-lingo-blue/15 rounded-full px-2 py-0.5">
                                     <Flame className="h-3 w-3" /> {st.current_streak} in a row
                                   </span>
                                 )}
                                 {st.days_since_last_attempt !== null && st.days_since_last_attempt >= 7 && (
-                                  <span className="flex items-center gap-1 text-xs text-amber-600 bg-amber-50 rounded-full px-2 py-0.5">
+                                  <span className="flex items-center gap-1 text-xs text-gray-500 bg-gray-100 rounded-full px-2 py-0.5">
                                     <Clock className="h-3 w-3" /> {st.days_since_last_attempt}d stale
                                   </span>
                                 )}
