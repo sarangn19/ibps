@@ -17,6 +17,8 @@ const Results: React.FC = () => {
   const [score, setScore] = useState({ total: 0, correct: 0, attempted: 0, accuracy: 0 });
   const [previousBest, setPreviousBest] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showMistakes, setShowMistakes] = useState(false);
+  const [retrying, setRetrying] = useState(false);
 
   useEffect(() => {
     fetchResults();
@@ -70,6 +72,18 @@ const Results: React.FC = () => {
     }
   };
 
+  const handleRetryMistakes = async () => {
+    setRetrying(true);
+    try {
+      const res = await api.post('/practice/retry-mistakes', { attempt_id: Number(attemptId) });
+      navigate(`/test/${res.data.test.id}`);
+    } catch (err: any) {
+      alert(err.response?.data?.error || 'Could not start retry session');
+    } finally {
+      setRetrying(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-lingo-bg">
@@ -92,6 +106,11 @@ const Results: React.FC = () => {
   }
 
   const insights = generateTestInsights(responses, score, test, previousBest);
+
+  const wrongCount = responses.filter(r => !r.is_correct && r.selected_option).length;
+  const displayed = showMistakes
+    ? responses.filter(r => !r.is_correct && r.selected_option)
+    : responses;
 
   return (
     <div className="min-h-screen bg-lingo-bg">
@@ -153,11 +172,41 @@ const Results: React.FC = () => {
 
         <div className="lingo-card overflow-hidden">
           <div className="p-6 border-b-2 border-lingo-border">
-            <h2 className="text-xl font-extrabold text-gray-900">Question-wise Analysis</h2>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <h2 className="text-xl font-extrabold text-gray-900">Question-wise Analysis</h2>
+              <div className="flex items-center gap-2">
+                {wrongCount > 0 && (
+                  <>
+                    <button
+                      onClick={() => setShowMistakes(!showMistakes)}
+                      className={`text-xs px-3 py-1.5 rounded-xl border-2 font-bold transition-colors ${
+                        showMistakes
+                          ? 'bg-lingo-red/15 text-lingo-red border-lingo-red'
+                          : 'bg-lingo-blue/15 text-lingo-blue-dark border-lingo-blue'
+                      }`}
+                    >
+                      {showMistakes ? 'Mistakes only' : 'All questions'}
+                    </button>
+                    <button
+                      onClick={handleRetryMistakes}
+                      disabled={retrying}
+                      className="px-3 py-1.5 bg-lingo-green text-white text-xs rounded-xl font-bold border-b-4 border-lingo-green-dark hover:bg-lingo-green-dark active:scale-[0.97] disabled:opacity-50 whitespace-nowrap"
+                    >
+                      {retrying ? 'Starting...' : 'Retry Mistakes'}
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="p-3 border-b-2 border-lingo-border bg-lingo-bg/50 flex items-center justify-between text-xs text-gray-500 font-bold">
+            <span>{showMistakes ? `Mistakes (${displayed.length})` : `All Questions (${displayed.length})`}</span>
+            <span>{wrongCount} wrong answers</span>
           </div>
 
           <div className="divide-y divide-lingo-border">
-            {responses.map((response, index) => (
+            {displayed.map((response, index) => (
               <div key={response.id} className="p-6">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center space-x-3">
