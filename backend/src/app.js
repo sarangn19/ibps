@@ -18,6 +18,7 @@ const { auth } = require('./middleware/auth');
 const { ensureSchema: ensureSuperadminSchema } = require('./services/superadminService');
 const { ensureSchema: ensureSubscriptionSchema } = require('./services/subscriptionService');
 const { ensureSchema: ensureRevisionSchema } = require('./controllers/revisionController');
+const { ensurePasswordResetSchema } = require('./controllers/authController');
 
 const app = express();
 
@@ -29,6 +30,7 @@ app.use(express.json());
 ensureSuperadminSchema().catch(err => console.error('Superadmin schema init failed:', err));
 ensureSubscriptionSchema().catch(err => console.error('Subscription schema init failed:', err));
 ensureRevisionSchema().catch(err => console.error('Revision schema init failed:', err));
+ensurePasswordResetSchema().catch(err => console.error('Password reset schema init failed:', err));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/questions', questionRoutes);

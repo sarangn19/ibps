@@ -71,12 +71,17 @@ const Login: React.FC = () => {
           </button>
         </form>
 
-        <p className="text-center mt-4 text-gray-600 font-semibold">
-          Don't have an account?{' '}
-          <Link to="/register" className="text-lingo-blue font-extrabold hover:underline">
-            Register
+        <div className="flex items-center justify-between mt-4 text-gray-600 font-semibold">
+          <Link to="/forgot-password" className="text-lingo-blue font-extrabold hover:underline">
+            Forgot password?
           </Link>
-        </p>
+          <span>
+            Don't have an account?{' '}
+            <Link to="/register" className="text-lingo-blue font-extrabold hover:underline">
+              Register
+            </Link>
+          </span>
+        </div>
       </div>
     </div>
   );

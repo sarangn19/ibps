@@ -1,9 +1,34 @@
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const pool = require('../database/db');
 const { ensureSchema: ensureSuperadminSchema } = require('../services/superadminService');
 const { getAccessForUser } = require('../services/subscriptionService');
 const { ensureSchema: ensureReferralSchema, nextUniqueCode, resolveReferrer } = require('../services/referralService');
+
+// Self-migrating: adds the password_resets table used by the no-email
+// forgot-password flow (code shown to the user in-app instead of emailed).
+async function ensurePasswordResetSchema() {
+  const client = await pool.connect();
+  try {
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS password_resets (
+        id BIGSERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        code_hash TEXT NOT NULL,
+        expires_at TEXT NOT NULL,
+        used BOOLEAN NOT NULL DEFAULT false,
+        created_at TEXT DEFAULT (to_char(now(), 'YYYY-MM-DD HH24:MI:SS'))
+      )`);
+    await client.query(`CREATE INDEX IF NOT EXISTS idx_password_resets_user ON password_resets(user_id)`);
+  } finally {
+    client.release();
+  }
+}
+
+function hashResetCode(code) {
+  return crypto.createHash('sha256').update(String(code)).digest('hex');
+}
 
 const register = async (req, res) => {
   try {
@@ -248,4 +273,88 @@ const getStudyPlan = async (req, res) => {
   }
 };
 
-module.exports = { register, login, getMe, saveOnboarding, getStudyPlan };
+const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ error: 'Email is required' });
+    }
+
+    await ensurePasswordResetSchema();
+
+    const userResult = await pool.query('SELECT id FROM users WHERE email = ?', [String(email).toLowerCase().trim()]);
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ error: 'No account found with that email' });
+    }
+    const userId = userResult.rows[0].id;
+
+    // Single-use 6-digit code, valid for 15 minutes.
+    const code = String(crypto.randomInt(100000, 1000000));
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString().replace('T', ' ').slice(0, 19);
+
+    await pool.query(
+      `INSERT INTO password_resets (user_id, code_hash, expires_at)
+       VALUES (?, ?, ?)`,
+      [userId, hashResetCode(code), expiresAt]
+    );
+
+    // Since there's no email service, return the code directly so it can be
+    // shown to the user (only valid for 15 minutes, single-use).
+    res.json({ success: true, reset_code: code, expires_in_minutes: 15 });
+  } catch (error) {
+    console.error('Forgot password error:', error);
+    res.status(500).json({ error: 'Failed to start password reset' });
+  }
+};
+
+const resetPassword = async (req, res) => {
+  try {
+    const { email, reset_code, new_password } = req.body;
+    if (!email || !reset_code || !new_password) {
+      return res.status(400).json({ error: 'Email, reset code and new password are required' });
+    }
+    if (String(new_password).length < 6) {
+      return res.status(400).json({ error: 'Password must be at least 6 characters' });
+    }
+
+    await ensurePasswordResetSchema();
+
+    const userResult = await pool.query('SELECT id FROM users WHERE email = ?', [String(email).toLowerCase().trim()]);
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ error: 'No account found with that email' });
+    }
+    const userId = userResult.rows[0].id;
+
+    const codeHash = hashResetCode(reset_code);
+    const resetResult = await pool.query(
+      `SELECT id, expires_at, used FROM password_resets
+       WHERE user_id = ? AND code_hash = ? AND used = false
+       ORDER BY created_at DESC LIMIT 1`,
+      [userId, codeHash]
+    );
+
+    if (resetResult.rows.length === 0) {
+      return res.status(400).json({ error: 'Invalid or already-used reset code' });
+    }
+
+    const reset = resetResult.rows[0];
+    const expiresAt = new Date(String(reset.expires_at).replace(' ', 'T') + 'Z');
+    if (isNaN(expiresAt.getTime()) || expiresAt.getTime() < Date.now()) {
+      return res.status(400).json({ error: 'Reset code has expired. Request a new one.' });
+    }
+
+    const passwordHash = await bcrypt.hash(new_password, 10);
+    await pool.query(
+      `UPDATE users SET password_hash = ? WHERE id = ?`,
+      [passwordHash, userId]
+    );
+    await pool.query(`UPDATE password_resets SET used = true WHERE id = ?`, [reset.id]);
+
+    res.json({ success: true, message: 'Password updated. You can log in now.' });
+  } catch (error) {
+    console.error('Reset password error:', error);
+    res.status(500).json({ error: 'Failed to reset password' });
+  }
+};
+
+module.exports = { register, login, getMe, saveOnboarding, getStudyPlan, forgotPassword, resetPassword, ensurePasswordResetSchema };
